@@ -67,6 +67,7 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
         if ($scope.config.WAITING_FOLDER.ACTIVE) $scope.folders.count++;
         if ($scope.config.COMPLETED_FOLDER.ACTIVE) $scope.folders.count++;
 
+        $scope.myWelcome = "nothing yet...";
         $http({
             method : "GET",
               url : "welcome.htm"
