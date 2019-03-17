@@ -67,6 +67,15 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
         if ($scope.config.WAITING_FOLDER.ACTIVE) $scope.folders.count++;
         if ($scope.config.COMPLETED_FOLDER.ACTIVE) $scope.folders.count++;
 
+        $http({
+            method : "GET",
+              url : "welcome.htm"
+          }).then(function mySuccess(response) {
+            $scope.myWelcome = response.data;
+          }, function myError(response) {
+            $scope.myWelcome = response.statusText;
+          });
+
         // ui-sortable options and events
         $scope.sortableOptions = {
             connectWith: '.tasklist',
