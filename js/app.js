@@ -70,7 +70,7 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
         $scope.myWelcome = "nothing yet...";
         $http({
             method : "GET",
-              url : "welcome.htm"
+              url : "https://www.december.com/html/spec/colorspottable.html"
           }).then(function mySuccess(response) {
             $scope.myWelcome = response.data;
           }, function myError(response) {
