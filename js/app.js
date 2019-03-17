@@ -74,6 +74,7 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
           }).then(function mySuccess(response) {
             $scope.myWelcome = response.data;
           }, function myError(response) {
+              alert(response)
             $scope.myWelcome = response.statusText;
           });
 
