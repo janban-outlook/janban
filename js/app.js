@@ -2,7 +2,7 @@
 
 var tbApp = angular.module('taskboardApp', ['ui.sortable']);
 
-tbApp.controller('taskboardController', function ($scope, $filter) {
+tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
     var applMode;
     var outlookCategories;
@@ -56,6 +56,8 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
         getConfig();
         getState();
 
+        $scope.statustext = readfile('');
+
         outlookCategories = getOutlookCategories();
         $scope.initTasks();
 
@@ -67,16 +69,6 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
         if ($scope.config.WAITING_FOLDER.ACTIVE) $scope.folders.count++;
         if ($scope.config.COMPLETED_FOLDER.ACTIVE) $scope.folders.count++;
 
-        $scope.myWelcome = "nothing yet...";
-        $http({
-            method : "GET",
-              url : "https://www.december.com/html/spec/colorspottable.html"
-          }).then(function mySuccess(response) {
-            $scope.myWelcome = response.data;
-          }, function myError(response) {
-              alert(response)
-            $scope.myWelcome = response.statusText;
-          });
 
         // ui-sortable options and events
         $scope.sortableOptions = {
@@ -155,6 +147,18 @@ tbApp.controller('taskboardController', function ($scope, $filter) {
             var search = newValues[0];
             $scope.applyFilters();
             saveState();
+        });
+    };
+
+    var readfile = function (url) {
+        alert(url)
+        $http.get(url)
+        .then(function(response) {
+            alert('read succesfully')
+            return response.statusText;            
+        }, function myError(response) {
+            alert('error')
+            return response.statusText;
         });
     };
 
