@@ -56,7 +56,17 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         getConfig();
         getState();
 
-        $scope.statustext = readfile('');
+        try {
+            alert(1)
+            // var janbanOnline = JanBanOnline();
+            alert(2)
+            // janbanOnline.getVersion(displayVersion);
+            alert(3)
+            new JanBanOnline().getVersion(displayVersion);
+            alert(4)
+            } catch (error) {
+            alert(error)
+        }
 
         outlookCategories = getOutlookCategories();
         $scope.initTasks();
@@ -150,16 +160,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         });
     };
 
-    var readfile = function (url) {
-        alert(url)
-        $http.get(url)
-        .then(function(response) {
-            alert('read succesfully')
-            return response.statusText;            
-        }, function myError(response) {
-            alert('error')
-            return response.statusText;
-        });
+    var displayVersion = function(text) {
+        $scope.version_number = text; 
     };
 
     $scope.submitConfig = function (editedConfig) {
