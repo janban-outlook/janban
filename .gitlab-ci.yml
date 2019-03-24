@@ -6,10 +6,12 @@ version:
   stage: version
   only:
     - master
+    - release-version-check 
   image: registry.gitlab.com/juhani/go-semrel-gitlab:v0.20.0
   script:
     - release next-version --allow-current > .next-version
     - release changelog
+    - echo "var VERSIONNR='$(<.next-version)''" >> js/version.js
     - release commit-and-tag CHANGELOG.md release_info
   artifacts:
     paths:

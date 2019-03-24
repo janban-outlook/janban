@@ -7,6 +7,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     var applMode;
     var outlookCategories;
 
+    const VERSION_URL = 'http://janware.nl/gitlab/version';
+
     const APP_MODE = 0;
     const CONFIG_MODE = 1;
     const HELP_MODE = 2;
@@ -19,6 +21,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
           private: { text : "Private", value: 1 },
           public:  { text : "Work", value: 2 }
         };
+    $scope.display_message = false;
+
 
     $scope.switchToAppMode = function () {
         applMode = APP_MODE;
@@ -55,19 +59,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         $scope.switchToAppMode();
         getConfig();
         getState();
-
-        try {
-            alert(1)
-            // var janbanOnline = JanBanOnline();
-            alert(2)
-            // janbanOnline.getVersion(displayVersion);
-            alert(3)
-            new JanBanOnline().getVersion(displayVersion);
-            alert(4)
-            } catch (error) {
-            alert(error)
-        }
-
+        getVersion();
+        
         outlookCategories = getOutlookCategories();
         $scope.initTasks();
 
@@ -158,10 +151,6 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             $scope.applyFilters();
             saveState();
         });
-    };
-
-    var displayVersion = function(text) {
-        $scope.version_number = text; 
     };
 
     $scope.submitConfig = function (editedConfig) {
@@ -632,6 +621,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             if ((categories !== '') && $scope.config.USE_CATEGORY_COLORS) {
                 // Copy category style
                 if (categories.length == 1) {
+                    if (categories[0] == undefined) return undefined;
                     return categories[0].style;
                 }
                 // Make multi-category tasks light gray
@@ -783,7 +773,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 "ACTION": "ARCHIVE"
             },
             "AUTO_UPDATE": true,
-            "AUTO_START_TASKS": false
+            "AUTO_START_TASKS": false,
+            "VERSION": ""
         }
     
     var getState = function () {
@@ -817,7 +808,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     }
 
     var getConfig = function () {
-        $scope.orgConfig = {};
+        // $scope.orgConfig = {};
         $scope.configRaw = getJournalItem(CONFIG_ID);
         if ($scope.configRaw !== null){
             try {
@@ -854,14 +845,32 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             $scope.config = DEFAULT_CONFIG;
             saveConfig();
         }
-        $scope.orgConfig = $scope.config;
     }
 
     var saveConfig = function () {
-        if (DeepDiff.diff($scope.orgConfig, $scope.config)) {
-            saveJournalItem(CONFIG_ID, JSON.stringify($scope.config, null, 2));
-        }
+        saveJournalItem(CONFIG_ID, JSON.stringify($scope.config, null, 2));
     }
+
+    var getVersion = function () {
+        $http.get(VERSION_URL)
+            .then(function(response) {
+                $scope.version_number = response.data;
+                $scope.version_number = $scope.version_number.replace(/\n|\r/g, "");
+                checkVersion();
+            });
+    };
+
+    var checkVersion = function () {
+        if ($scope.config.VERSION != $scope.version_number) {
+            if ($scope.config.VERSION == '') {
+                $scope.config.VERSION = $scope.version_number;
+            }
+            else {
+                $scope.display_message = true;
+            }
+            saveConfig();
+        }
+    };
 
     var getCategoryStyles = function (csvCategories) {
 
