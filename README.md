@@ -39,3 +39,6 @@ That's all !!
 ## Local Setup (advanced)
 
 For a local setup, refer to the instructions on http://papasmurf.nl/janban
+
+
+My favourite browser is [Brave] (https://brave.com/jan964). Please try it, and find out for yourself how fast it is.
