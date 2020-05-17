@@ -4,6 +4,7 @@ var outlookApp;
 var outlookNS;
 
 const SENSITIVITY = { olNormal: 0, olPrivate: 2 };
+const OlDefaultFolders = { olFolderTasks: 13 };
 
 function checkBrowser() {
     var isBrowserSupported
@@ -39,74 +40,149 @@ function getOutlookCategories() {
     return { names: catNames, colors: catColors };
 }
 
+function getOutlookMailboxes() {
+    var i;
+    var mi = 0;
+    var mailboxNames = [];
+    var folders = outlookNS.Folders;
+    var count = folders.count;
+    mailboxNames.length = count;
+    mailboxNames[mi] = getDefaultMailbox().Name;
+    for (i = 1; i <= count; i++) {
+        var acc = folders.Item(i).Name;
+        if (acc != mailboxNames[0]) {
+            mi++;
+            mailboxNames[mi] = acc;
+        }
+    };
+    return mailboxNames;
+}
+
+function getDefaultMailbox() {
+    return outlookNS.GetDefaultFolder(OlDefaultFolders.olFolderTasks).Parent;
+}
+
 function getOutlookTodayHomePageFolder() {
-    return outlookNS.GetDefaultFolder(13).Parent.WebViewUrl
+    return outlookNS.GetDefaultFolder(OlDefaultFolders.olFolderTasks).Parent.WebViewUrl;
 }
 
 function getOutlookVersion() {
     return outlookApp.version;
 }
 
-function getTaskFolder(folderName) {
-    if (folderName === undefined || folderName === '') {
-        // if folder path is not defined, return main Tasks folder
-        var folder = outlookNS.GetDefaultFolder(13);
-    } else {
-        // if folder path is defined then find it, create it if it doesn't exist yet
-        try {
-            var folder = outlookNS.GetDefaultFolder(13).Folders(folderName);
+function getFolderIndex(folders, folder) {
+    try {
+        var i;
+        for (i = 1; i <= folders.count; i++) {
+            if (folders(i).Name == folder) {
+                return i;
+            }
         }
-        catch (e) {
-            outlookNS.GetDefaultFolder(13).Folders.Add(folderName);
-            var folder = outlookNS.GetDefaultFolder(13).Folders(folderName);
-        }
+        return -1;
+    } catch (error) {
+        alert('getFolderIndex error:' + error)
     }
-    return folder;
 }
 
-function getJournalFolder(){
+function getTaskFolder(mailbox, folderName) {
+    try {
+        var folder = getMainTasksFolder(mailbox)
+        if (folderName == '') {
+            return folder;
+        }
+        return getOrCreateFolder(folderName, folder.Folders, OlDefaultFolders.olFolderTasks);
+    } catch (error) {
+        alert('getTaskFolder error:' + error)
+    }
+}
+
+function getMainTasksFolder(mailbox) {
+    try {
+        var name = '';
+	    var mbRecipient = outlookNS.CreateRecipient(mailbox);
+	    try {
+		    mbRecipient.Resolve();
+		    var folder = outlookNS.GetSharedDefaultFolder(mbRecipient, OlDefaultFolders.olFolderTasks);
+            name = folder.Name;
+	    }
+        catch(e) {}
+        var i = getFolderIndex(outlookNS.Folders, mailbox);
+        if (name == '') {
+            var name = getDefaultTasksFolderName();
+        }
+        return getOrCreateFolder(name, outlookNS.Folders(i).Folders, OlDefaultFolders.olFolderTasks);
+    } catch (error) {
+        alert('getMainTasksFolder error:' + error)
+    }
+}
+
+function getOrCreateFolder(folderName, inFolders, folderType) {
+    try {
+        var i = getFolderIndex(inFolders, folderName);
+        if (i == -1) {
+            var f = inFolders.Add(folderName, folderType);
+            if (f.Name != folderName) {
+                inFolders.Add(folderName, folderType);
+                f.Delete();
+            }
+        }
+        return inFolders(folderName);
+    } catch (error) {
+        alert('getOrCreateFolder error:' + error)
+    }
+}
+
+function getDefaultTasksFolderName() {
+    return outlookNS.GetDefaultFolder(OlDefaultFolders.olFolderTasks).Name;
+}
+
+function getJournalFolder() {
     return outlookNS.GetDefaultFolder(11);
 }
 
-function getTaskItems(folderName) {
-    return getTaskFolder(folderName).Items;
+function getTaskItems(mailbox, folderName) {
+    return getTaskFolder(mailbox, folderName).Items;
 }
 
-function getTaskItem(id){
+function getTaskItem(id) {
     return outlookNS.GetItemFromID(id);
 }
 
-function newMailItem(){
+function newMailItem() {
     return outlookApp.CreateItem(0);
 }
 
-function newJournalItem(){
+function newJournalItem() {
     return outlookApp.CreateItem(4);
 }
 
-function getJournalItem(subject){
+function newNoteItem() {
+    return outlookApp.CreateItem(5);
+}
+
+function getJournalItem(subject) {
     var folder = getJournalFolder();
     var configItems = folder.Items.Restrict('[Subject] = "' + subject + '"');
     if (configItems.Count > 0) {
         var configItem = configItems(1);
-        if (configItem.Body){
+        if (configItem.Body) {
             return configItem.Body;
         }
-    }   
+    }
     return null;
 }
 
-function getPureJournalItem(subject){
+function getPureJournalItem(subject) {
     var folder = getJournalFolder();
     var configItems = folder.Items.Restrict('[Subject] = "' + subject + '"');
     if (configItems.Count > 0) {
         var configItem = configItems(1);
         return configItem;
-    }   
+    }
     return null;
 }
 
-function saveJournalItem(subject, body){
+function saveJournalItem(subject, body) {
     var folder = getJournalFolder();
     var configItems = folder.Items.Restrict('[Subject] = "' + subject + '"');
     if (configItems.Count == 0) {
@@ -122,9 +198,9 @@ function saveJournalItem(subject, body){
 
 function getUserEmailAddress() {
     try {
-        return outlookNS.Accounts.Item(1).SmtpAddress;
+        return outlookNS.folders.Item(1).SmtpAddress;
     } catch (error) {
-        return 'address-unknown';      
+        return 'address-unknown';
     }
 }
 
@@ -132,10 +208,10 @@ function getUserName() {
     try {
         return outlookApp.Session.CurrentUser.Name;
     } catch (error) {
-        return 'name-unknown';        
+        return 'name-unknown';
     }
 }
-    
+
 function getUserProperty(item, prop) {
     var userprop = item.UserProperties(prop);
     var value = '';

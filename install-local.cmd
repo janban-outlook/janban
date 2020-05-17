@@ -7,7 +7,7 @@ if not exist kanban.html (
 )
 robocopy /mir . %USERPROFILE%\janban 
 set offver=0
-for /l %%x in (12, 1, 19) do (
+for /l %%x in (12, 1, 16, 9) do (
       reg export HKCU\Software\Microsoft\Office\%%x.0\Outlook\Today %%x /y
 	  if exist %%x set offver=%%x
 )
