@@ -104,7 +104,7 @@
                                                                                   placeholder="Filter" />
                         <div class="input-group-addon">
                             <select class="btn btn-default btn-xs" ng-model="filter.category">
-                                <option ng-selected="{{category == filter.category}}" ng-repeat="category in categories"
+                                <option ng-selected="{{category == filter.category}}" ng-repeat="category in activeCategories"
                                                                                       value="{{category}}">
                                 {{category}}
                                 </option>

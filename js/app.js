@@ -25,7 +25,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     const WAITING = 4;
     const DONE = 5;
 
-    const MAX_LOG_ENTRIES = 500;
+    const MAX_LOG_ENTRIES = 1500;
 
     $scope.includeConfig = true;
     $scope.includeState = true;
@@ -283,7 +283,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
     var getTasksFromOutlook = function (path, sort, folderStatus) {
         try {
-            var i, array = [];
+            var i, j, cats, array = [];
             var tasks = getTaskItems($scope.filter.mailbox, path);
 
             var count = tasks.Count;
@@ -307,6 +307,15 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                         owner: task.Owner,
                         totalwork: task.TotalWork,
                     });
+                }
+                cats = task.Categories.split(/[;,]+/);
+                for (j=0; j < cats.length; j++) {
+                    cats[j] = cats[j].trim();
+                    if (cats[j].length > 0) {
+                        if ($scope.activeCategories.indexOf(cats[j]) === -1) {
+                            $scope.activeCategories.push(cats[j]);
+                        }
+                    }
                 }
             };
 
@@ -339,11 +348,13 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
     $scope.initTasks = function () {
         try {
+            $scope.activeCategories = ["<All Categories>","<No Category>"];
             // get tasks from each outlook folder and populate model data
             $scope.taskFolders.forEach(function (taskFolder) {
                 taskFolder.tasks = getTasksFromOutlook(taskFolder.name, taskFolder.sort, taskFolder.initialStatus);
                 taskFolder.filteredTasks = taskFolder.tasks;
             });
+            $scope.activeCategories = $scope.activeCategories.sort();
 
             // then apply the current filters for search and sensitivity
             $scope.applyFilters();
@@ -372,17 +383,24 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             // move tasks that do not have status New to the Next folder
             if (true) {
+                writeLog('moving tasks that do not have status New from BACKLOG to NEXT', true);
                 var i;
                 var movedTask = false;
                 var tasks = $scope.taskFolders[BACKLOG].tasks;
                 var count = tasks.length;
+                var moved = 0;
                 for (i = 0; i < count; i++) {
                     if (tasks[i].status != $scope.config.STATUS.NOT_STARTED.TEXT) {
                         var taskitem = getTaskItem(tasks[i].entryID);
+                        writeLog('category before move: ' + taskitem.Categories, true)
                         taskitem.Move(getTaskFolder($scope.filter.mailbox, $scope.taskFolders[SPRINT].name));
                         movedTask = true;
+                        moved++;
+                        writeLog('task moved, status = ' + tasks[i].status, true);
+                        writeLog('category after move: ' + getTaskItem(tasks[i].entryID).Categories, true)
                     }
                 };
+                writeLog(moved + ' tasks moved', true);
                 if (movedTask) {
                     // TODO: why read all the task when onlya few items are moved
                     // Read all tasks again
@@ -395,20 +413,27 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             // move tasks with start date today to the Next folder
             if ($scope.config.AUTO_START_TASKS) {
+                writeLog('moving tasks with start date today from BACKLOG to SPRINT', true);
                 var i;
                 var movedTask = false;
                 var tasks = $scope.taskFolders[BACKLOG].tasks;
                 var count = tasks.length;
+                var moved = 0;
                 for (i = 0; i < count; i++) {
                     if (tasks[i].startdate.getFullYear() != 4501) {
                         var seconds = Date.secondsBetween(tasks[i].startdate, new Date());
                         if (seconds >= 0) {
                             var taskitem = getTaskItem(tasks[i].entryID);
+                            writeLog('category before move: ' + taskitem.Categories, true)
                             taskitem.Move(getTaskFolder($scope.filter.mailbox, $scope.taskFolders[SPRINT].name));
                             movedTask = true;
+                            moved++;
+                            writeLog('task moved, startdate = ' + tasks[i].startdate, true);
+                            writeLog('category after move: ' + getTaskItem(tasks[i].entryID).Categories, true)
                         }
                     };
                 };
+                writeLog(moved + ' tasks moved', true);
                 if (movedTask) {
                     // TODO: why read all the task when onlya few items are moved
                     // Read all tasks again
@@ -421,20 +446,27 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             // move tasks with past due date to the Next folder
             if ($scope.config.AUTO_START_DUE_TASKS) {
+                writeLog('moving tasks with past due date from BACKLOG to SPRINT', true);
                 var i;
                 var movedTask = false;
                 var tasks = $scope.taskFolders[BACKLOG].tasks;
                 var count = tasks.length;
+                var moved = 0;
                 for (i = 0; i < count; i++) {
                     if (tasks[i].duedate.getFullYear() != 4501) {
                         var seconds = Date.secondsBetween(tasks[i].duedate, new Date());
                         if (seconds >= 0) {
                             var taskitem = getTaskItem(tasks[i].entryID);
+                            writeLog('category before move: ' + taskitem.Categories, true)
                             taskitem.Move(getTaskFolder($scope.filter.mailbox, $scope.taskFolders[SPRINT].name));
                             movedTask = true;
+                            moved++;
+                            writeLog('task moved, due date = ' + tasks[i].duedate, true);
+                            writeLog('category after move: ' + getTaskItem(tasks[i].entryID).Categories, true)
                         }
                     };
                 };
+                writeLog(moved + ' tasks moved', true);
                 if (movedTask) {
                     // TODO: why read all the task when onlya few items are moved
                     // Read all tasks again
@@ -447,20 +479,27 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             // move tasks with start date in future back to the Backlog folder
             if (true) {
+                writeLog('moving tasks with start date in future from SPRINT to BACKLOG folder', true);
                 var i;
                 var movedTask = false;
                 var tasks = $scope.taskFolders[SPRINT].tasks;
                 var count = tasks.length;
+                var moved = 0;
                 for (i = 0; i < count; i++) {
                     if (tasks[i].startdate.getFullYear() != 4501) {
                         var seconds = Date.secondsBetween(new Date(), tasks[i].startdate);
                         if (seconds >= 0) {
                             var taskitem = getTaskItem(tasks[i].entryID);
+                            writeLog('category before move: ' + taskitem.Categories, true)
                             taskitem.Move(getTaskFolder($scope.filter.mailbox, $scope.taskFolders[BACKLOG].name));
                             movedTask = true;
+                            moved++;
+                            writeLog('task moved, startdate = ' + tasks[i].startdate, true);
+                            writeLog('category after move: ' + getTaskItem(tasks[i].entryID).Categories, true)
                         }
                     };
                 };
+                writeLog(moved + ' tasks moved', true);
                 if (movedTask) {
                     // TODO: why read all the task when onlya few items are moved
                     // Read all tasks again
@@ -1252,7 +1291,12 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             if (state.private === true) state.private = $scope.privacyFilter.private.value;
             if (state.private === false) state.private = $scope.privacyFilter.public.value;
             if (state.category === undefined) state.category = '<All Categories>';
-            if (state.mailbox === undefined) state.mailbox = $scope.mailboxes[0];
+
+            // check state.mailbox; if it is not found in the *active* mailboxes array
+            // then take the default mailbox
+            if (!$scope.contains($scope.config.ACTIVE_MAILBOXES, state.mailbox)) {
+                state.mailbox = $scope.mailboxes[0];
+            }
 
             $scope.filter =
                 {
@@ -1358,8 +1402,26 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     var migrateConfig = function () {
         try {
             var isChanged = false;
+            
+            var newArray = [];
+            var i;
+            for (i = 0; i < $scope.config.ACTIVE_MAILBOXES.length; i++) {
+               var mailbox = $scope.config.ACTIVE_MAILBOXES[i];
+               var fixed = fixMailboxName(mailbox);
+               if (fixed !== mailbox) {
+            		mailbox = fixed;
+            		isChanged = true;
+            	};
+            	if (find($scope.mailboxes, mailbox)) {
+            	   newArray.push(mailbox);
+            	}
+            	else {
+            	   isChanged = true;
+            	};
+            };
 
             if (isChanged) {
+            	 $scope.config.ACTIVE_MAILBOXES = newArray;
                 saveConfig();
                 // as long as we need configraw...
                 $scope.configRaw = getJournalItem(CONFIG_ID);
@@ -1369,9 +1431,19 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             writeLog('migrateConfig: ' + error)
         }
     }
+    
+    var find = function (arr, value) {
+       var result = false;
+       arr.forEach( function(elem) {
+          if (elem === value) result = true;
+       });
+       return result;
+    }
 
-    var writeLog = function (message) {
-        alert('writeLog:'+ message)
+    var writeLog = function (message, noAlert) {
+        if (noAlert != true) {
+            alert('writeLog:'+ message)
+        }
         try {
             var doLog = false;
             if ($scope.config == undefined) {

@@ -5,6 +5,7 @@ var outlookNS;
 
 const SENSITIVITY = { olNormal: 0, olPrivate: 2 };
 const OlDefaultFolders = { olFolderTasks: 13 };
+const OlItemType = { olTaskItem: 3 };
 
 function checkBrowser() {
     var isBrowserSupported
@@ -47,15 +48,48 @@ function getOutlookMailboxes() {
     var folders = outlookNS.Folders;
     var count = folders.count;
     mailboxNames.length = count;
-    mailboxNames[mi] = getDefaultMailbox().Name;
+    mailboxNames[mi] = fixMailboxName(getDefaultMailbox().Name);
     for (i = 1; i <= count; i++) {
         var acc = folders.Item(i).Name;
         if (acc != mailboxNames[0]) {
             mi++;
-            mailboxNames[mi] = acc;
+            if (hasTasksFolder(folders.Item(i))) {
+                mailboxNames[mi] = fixMailboxName(acc);
+            }
         }
     };
+    mailboxNames.length = mi + 1;
     return mailboxNames;
+}
+
+function hasTasksFolder(mailbox) {
+    var i;
+    for (i = 1; i <= mailbox.Folders.count; i++) {
+        if (mailbox.Folders(i).DefaultItemType == OlItemType.olTaskItem ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function findTasksFolder(mailboxName) {
+    var i;
+    var j = getFolderIndex(outlookNS.Folders, mailboxName);
+    var mailbox = outlookNS.Folders(j);
+    for (i = 1; i <= mailbox.Folders.count; i++) {
+        if (mailbox.Folders(i).DefaultItemType == OlItemType.olTaskItem ) {
+            return mailbox.Folders(i);
+        }
+    }
+    return false;
+}
+
+function fixMailboxName(name) {
+    var i = name.indexOf(' <');
+    if (i > -1) {
+        name = name.substring(0,i);
+    }
+    return name;
 }
 
 function getDefaultMailbox() {
@@ -86,37 +120,18 @@ function getFolderIndex(folders, folder) {
 
 function getTaskFolder(mailbox, folderName) {
     try {
-        var folder = getMainTasksFolder(mailbox)
+        var folder = findTasksFolder(mailbox);
         if (folderName == '') {
             return folder;
         }
-        return getOrCreateFolder(folderName, folder.Folders, OlDefaultFolders.olFolderTasks);
+        var returnFolder = getOrCreateFolder(mailbox, folderName, folder.Folders, OlDefaultFolders.olFolderTasks);
+        return returnFolder;
     } catch (error) {
         alert('getTaskFolder error:' + error)
     }
 }
 
-function getMainTasksFolder(mailbox) {
-    try {
-        var name = '';
-	    var mbRecipient = outlookNS.CreateRecipient(mailbox);
-	    try {
-		    mbRecipient.Resolve();
-		    var folder = outlookNS.GetSharedDefaultFolder(mbRecipient, OlDefaultFolders.olFolderTasks);
-            name = folder.Name;
-	    }
-        catch(e) {}
-        var i = getFolderIndex(outlookNS.Folders, mailbox);
-        if (name == '') {
-            var name = getDefaultTasksFolderName();
-        }
-        return getOrCreateFolder(name, outlookNS.Folders(i).Folders, OlDefaultFolders.olFolderTasks);
-    } catch (error) {
-        alert('getMainTasksFolder error:' + error)
-    }
-}
-
-function getOrCreateFolder(folderName, inFolders, folderType) {
+function getOrCreateFolder(mailbox, folderName, inFolders, folderType) {
     try {
         var i = getFolderIndex(inFolders, folderName);
         if (i == -1) {
@@ -128,7 +143,7 @@ function getOrCreateFolder(folderName, inFolders, folderType) {
         }
         return inFolders(folderName);
     } catch (error) {
-        alert('getOrCreateFolder error:' + error)
+        alert('getOrCreateFolder error creating folder ' + folderName + ' in ' + mailbox + '  error: ' + error)
     }
 }
 

@@ -4,7 +4,7 @@
 
     <head>
         <title>Outlook Task Board</title>
-        <meta http-equiv="X-UA-Compatible" content="IE=11">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/taskboard.css">
@@ -25,57 +25,34 @@
 
         <script>
 
+//var outlookApp = window.external.OutlookApplication;
+//var outlookNS = outlookApp.GetNameSpace("MAPI");
 var outlookApp = new ActiveXObject("Outlook.Application");
 var outlookNS = outlookApp.GetNameSpace("MAPI");
+
+getOutlookMailboxes();
+getTaskFolder('Software Administrator', 'Someday');
+//getTaskFolder('jan.van.veldhuizen@onguard.com', 'Someday');
 
 var folders = outlookNS.Folders;
 var c1 = folders.count;
 for (i = 1 ;i <= c1; i++) {
-    console.log('i = '+i+' '+folders.Item(i).Name);
+    document.write('<br>i = '+i+' '+folders.Item(i).Name);
     var subFolders = folders.Item(i).Folders;
     var c2 = subFolders.count;
     for (j = 1;j<=c2;j++) {
-        console.log('  j = '+j+' '+subFolders.Item(j).Name);
+        document.write('<br>  j = '+j+' '+subFolders.Item(j).Name);
         var subSubFolders = subFolders.Item(j).Folders;
         var c3 = subSubFolders.count;
         for (k = 1; k <=c3;k++) {
-            console.log('    k = '+k+' '+subSubFolders.Item(k).Name);
+            document.write('<br>    k = '+k+' '+subSubFolders.Item(k).Name);
         }
     }
 }
 
+var defaultMailbox = getDefaultMailbox();
+document.write('<br>default mailbox: ' + defaultMailbox);
 
-var tasksFolderJvv = getMainTasksFolder('jan.van.veldhuizen@onguard.com');
-var tasksFolderAdmin = getMainTasksFolder('Software Administrator');
-console.log('tasks Folder JVV: ' + tasksFolderJvv.Name);
-console.log('tasks Folder Admin: ' + tasksFolderAdmin.Name);
-console.log('tasks Folder JVV Folders count: ' + tasksFolderJvv.Folders.count);
-console.log('tasks Folder Admin Folders count: ' + tasksFolderAdmin.Folders.count);
-
-var tf = tasksFolderJvv.Folders('test');
-console.log(tf);
-
-var testFolderJvvIndex = getFolderIndex(tasksFolderJvv.Folders,'test');
-if (testFolderJvvIndex == -1) {
-    tasksFolderJvv.Folders.Add('test');
-    console.log('test folder for JVV created');
-}
-testFolderJvvIndex = getFolderIndex(tasksFolderJvv.Folders,'test');
-console.log('index for test folder = ' + testFolderJvvIndex);
-
-var tff = tasksFolderAdmin.Folders('test');
-console.log(tff);
-    
-var testFolderAdminIndex = getFolderIndex(tasksFolderAdmin.Folders,'test');
-if (testFolderAdminIndex == -1) {
-    tasksFolderAdmin.Folders.Add('test');
-    console.log('test folder for Admin created');
-}
-testFolderAdminIndex = getFolderIndex(tasksFolderAdmin.Folders,'test');
-console.log('index for test folder = ' + testFolderAdminIndex);
-
-console.log('subfolder 1 JVV: ' + tasksFolderJvv.Folders(1).Name);
-console.log('subfolder 1 Admin: ' + tasksFolderAdmin.Folders(1).Name);
 
         </script>
     </head>
