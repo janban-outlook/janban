@@ -51,10 +51,12 @@ function getOutlookMailboxes() {
     mailboxNames[mi] = fixMailboxName(getDefaultMailbox().Name);
     for (i = 1; i <= count; i++) {
         var acc = folders.Item(i).Name;
-        if (acc != mailboxNames[0]) {
-            mi++;
-            if (hasTasksFolder(folders.Item(i))) {
-                mailboxNames[mi] = fixMailboxName(acc);
+        if (acc.indexOf("Internet Calendar") == -1) {
+            if (acc != mailboxNames[0]) {
+                mi++;
+                if (hasTasksFolder(folders.Item(i))) {
+                    mailboxNames[mi] = fixMailboxName(acc);
+                }
             }
         }
     };
