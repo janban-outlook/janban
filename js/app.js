@@ -957,6 +957,26 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
     };
 
+    $scope.getTaskboardBackgroundColor = function () {
+        try {
+            if ($scope.config.DARK_MODE)
+                return { "background-color": '#6a6a6a' }
+        } catch (error) {
+            writeLog('getTaskgroundBackgroundColor: ' + error)
+        }
+    };
+
+    $scope.getTasklistBackgroundColor = function () {
+        try {
+            if ($scope.config.DARK_MODE)
+                return { "background-color": '#b2b2b2' }
+            else
+                return { "background-color": '#f5f5f5' }
+        } catch (error) {
+            writeLog('getTasklistBackgroundColor: ' + error)
+        }
+    };
+
     Date.daysBetween = function (date1, date2) {
         try {
             //Get 1 day in milliseconds
@@ -1204,6 +1224,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             "DATE_FORMAT": "dd-MMM",
             "USE_CATEGORY_COLORS": true,
             "USE_CATEGORY_COLOR_FOOTERS": false,
+            "DARK_MODE": false,
             "SAVE_STATE": true,
             "STATUS": {
                 "NOT_STARTED": {

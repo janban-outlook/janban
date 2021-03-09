@@ -50,14 +50,20 @@ function getOutlookMailboxes() {
     mailboxNames.length = count;
     mailboxNames[mi] = fixMailboxName(getDefaultMailbox().Name);
     for (i = 1; i <= count; i++) {
-        var acc = folders.Item(i).Name;
-        if (acc.indexOf("Internet Calendar") == -1) {
-            if (acc != mailboxNames[0]) {
-                mi++;
-                if (hasTasksFolder(folders.Item(i))) {
-                    mailboxNames[mi] = fixMailboxName(acc);
+        try {
+            var acc = folders.Item(i).Name;
+            if (acc.indexOf("Internet Calendar") == -1) {
+                if (acc != mailboxNames[0]) {
+                    mi++;
+                    if (hasTasksFolder(folders.Item(i))) {
+                        mailboxNames[mi] = fixMailboxName(acc);
+                    }
                 }
             }
+        }
+        catch (e)
+        {
+            // ignore this error, because this mailbox will not be useful for the kanban board
         }
     };
     mailboxNames.length = mi + 1;

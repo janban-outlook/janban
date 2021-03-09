@@ -37,7 +37,7 @@
             <h2>That's it!! Have fun!</h2>
         </div>
 
-        <div ng-if="isBrowserSupported" class="taskboard container-fluid">
+        <div ng-if="isBrowserSupported" class="taskboard container-fluid" ng-style="getTaskboardBackgroundColor()">
 
             <!-- header bar -->
             <section id="headerbar" class="row">
@@ -161,7 +161,8 @@
                         </header>
                         <ul id="folder-{{folder.type}}" ui-sortable="sortableOptions" ng-model="folder.filteredTasks"
                                                                                       ng-class="{ 'tasklist-default' : !display_message, 'tasklist-message' : display_message }"
-                                                                                      class="panel-body list-unstyled tasklist">
+                                                                                      class="panel-body list-unstyled tasklist"
+                                                                                      ng-style="getTasklistBackgroundColor()">
                             <li ng-repeat="task in folder.filteredTasks" class="task panel"
                                                                          ng-class="{ 'task-completed': folder.type == 5,  'task-low' : task.priority === 0, 'task-medium' : task.priority === 1, 'task-high' : task.priority === 2, 'task-private': task.sensitivity === 2 }"
                                                                          ng-dblclick="editTask(task)">
@@ -509,6 +510,12 @@
                                                 <label class="control-label"><input type="checkbox"
                                                                                     ng-model="config.USE_CATEGORY_COLOR_FOOTERS"> Entire
                                                                                     footer</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check row col-sm-12">
+                                            <label class="control-label col-sm-1">Dark Mode:</label>
+                                            <div class="col-sm-1">
+                                                <input type="checkbox" ng-model="config.DARK_MODE">
                                             </div>
                                         </div>
                                         <div class="form-group row col-sm-12">
