@@ -344,7 +344,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         try {
             $scope.taskFolders.forEach(function (taskFolder) {
                 if (taskFolder.display === true) {
-                    $scope.getTasks(taskFolder.type);
+                    $scope.getTasks(taskFolder.type, false);
                 }
             });
         } catch (error) {
@@ -352,9 +352,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
     }
     
-    $scope.getTasks = function (type) {
+    $scope.getTasks = function (type, reread) {
         try {
-           if (typeof $scope.taskFolders[type].tasks === 'undefined') {
+           if (typeof $scope.taskFolders[type].tasks === 'undefined' || reread == true) {
                var name = $scope.taskFolders[type].name;
                var sort = $scope.taskFolders[type].sort;
                var initialStatus = $scope.taskFolders[type].initialStatus;
@@ -378,7 +378,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             // clean up Completed Tasks
             if ($scope.config.COMPLETED.ACTION == 'ARCHIVE' || $scope.config.COMPLETED.ACTION == 'DELETE') {
                 var i;
-                $scope.getTasks(DONE);
+                $scope.getTasks(DONE, false);
                 var tasks = $scope.taskFolders[DONE].tasks;
                 var count = tasks.length;
                 for (i = 0; i < count; i++) {
@@ -401,8 +401,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             if (true) {
                 var i;
                 var movedTask = false;
-                $scope.getTasks(BACKLOG)
-                $scope.getTasks(SPRINT)
+                $scope.getTasks(BACKLOG, false)
+                $scope.getTasks(SPRINT, false)
                 var tasks = $scope.taskFolders[BACKLOG].tasks;
                 var count = tasks.length;
                 var moved = 0;
@@ -415,16 +415,16 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                     }
                 };
                 if (movedTask) {
-                    $scope.getTasks(BACKLOG)
-                    $scope.getTasks(SPRINT)
+                    $scope.getTasks(BACKLOG, true)
+                    $scope.getTasks(SPRINT, true)
                 }
             }
             // move tasks with start date today to the Next folder
             if ($scope.config.AUTO_START_TASKS) {
                 var i;
                 var movedTask = false;
-                $scope.getTasks(BACKLOG)
-                $scope.getTasks(SPRINT)
+                $scope.getTasks(BACKLOG, false)
+                $scope.getTasks(SPRINT, false)
                 var tasks = $scope.taskFolders[BACKLOG].tasks;
                 var count = tasks.length;
                 var moved = 0;
@@ -440,16 +440,16 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                     };
                 };
                 if (movedTask) {
-                    $scope.getTasks(BACKLOG)
-                    $scope.getTasks(SPRINT)
+                    $scope.getTasks(BACKLOG, true)
+                    $scope.getTasks(SPRINT, true)
                 }
             }
             // move tasks with past due date to the Next folder
             if ($scope.config.AUTO_START_DUE_TASKS) {
                 var i;
                 var movedTask = false;
-                $scope.getTasks(BACKLOG)
-                $scope.getTasks(SPRINT)
+                $scope.getTasks(BACKLOG, false)
+                $scope.getTasks(SPRINT, false)
                 var tasks = $scope.taskFolders[BACKLOG].tasks;
                 var count = tasks.length;
                 var moved = 0;
@@ -465,16 +465,16 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                     };
                 };
                 if (movedTask) {
-                    $scope.getTasks(BACKLOG)
-                    $scope.getTasks(SPRINT)
+                    $scope.getTasks(BACKLOG, true)
+                    $scope.getTasks(SPRINT, true)
                 }
             }
             // move tasks with start date in future back to the Backlog folder
             if (true) {
                 var i;
                 var movedTask = false;
-                $scope.getTasks(BACKLOG)
-                $scope.getTasks(SPRINT)
+                $scope.getTasks(BACKLOG, false)
+                $scope.getTasks(SPRINT, false)
                 var tasks = $scope.taskFolders[SPRINT].tasks;
                 var count = tasks.length;
                 var moved = 0;
@@ -490,8 +490,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                     };
                 };
                 if (movedTask) {
-                    $scope.getTasks(BACKLOG)
-                    $scope.getTasks(SPRINT)
+                    $scope.getTasks(BACKLOG, true)
+                    $scope.getTasks(SPRINT, true)
                 }
             }
         } catch (error) {
