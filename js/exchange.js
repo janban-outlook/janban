@@ -41,7 +41,7 @@ function getOutlookCategories() {
     return { names: catNames, colors: catColors };
 }
 
-function getOutlookMailboxes() {
+function getOutlookMailboxes(multiMailbox) {
     var i;
     var mi = 0;
     var mailboxNames = [];
@@ -49,6 +49,11 @@ function getOutlookMailboxes() {
     var count = folders.count;
     mailboxNames.length = count;
     mailboxNames[mi] = fixMailboxName(getDefaultMailbox().Name);
+    if (!multiMailbox) 
+    { 
+        mailboxNames.length = 1;
+        return mailboxNames; 
+    }
     for (i = 1; i <= count; i++) {
         try {
             var acc = folders.Item(i).Name;
