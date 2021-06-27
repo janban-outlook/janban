@@ -1347,6 +1347,10 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
         return false;
     }
+    
+    $scope.whatsnew = function () {
+        return "https://janware.nl/gitlab/whatsnew.html"
+    }
 
     var saveState = function () {
         try {
@@ -1507,7 +1511,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         $scope.WHATSNEW_URL = '#WHATSNEW#';
         $scope.version = VERSION;
     }
-
+    
     var getVersion = function () {
         try {
             $http.get($scope.VERSION_URL, { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } })
