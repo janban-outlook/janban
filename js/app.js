@@ -140,91 +140,51 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             stop: function (e, ui) {
                 try {
-                    // locate the target folder in outlook
-                    // ui.item.sortable.droptarget[0].id represents the id of the target list
                     if (ui.item.sortable.droptarget) { // check if it is dropped on a valid target
-                        if (
-                            ($scope.config.INPROGRESS_FOLDER.LIMIT !== 0
-                                && e.target.id !== ('folder-' + DOING)
-                                && ui.item.sortable.droptarget.attr('id') === ('folder-' + DOING)
-                                && $scope.taskFolders[DOING].tasks.length > $scope.config.INPROGRESS_FOLDER.LIMIT)
-                            ||
-                            ($scope.config.NEXT_FOLDER.LIMIT !== 0
-                                && ('folder-' + SPRINT)
-                                && ui.item.sortable.droptarget.attr('id') === ('folder-' + SPRINT)
-                                && ('folder-' + SPRINT)
-                                && ui.item.sortable.droptarget.attr('id') === ('folder-' + SPRINT)
-                                && $scope.taskFolders[SPRINT].tasks.length > $scope.config.NEXT_FOLDER.LIMIT)
-                            ||
-                            ($scope.config.WAITING_FOLDER.LIMIT !== 0
-                                && e.target.id !== ('folder-' + WAITING)
-                                && ui.item.sortable.droptarget.attr('id') === ('folder-' + WAITING)
-                                && $scope.taskFolders[WAITING].tasks.length > $scope.config.WAITING_FOLDER.LIMIT)) {
-                            alert('Sorry, you reached the defined limit of this folder')
-                            $scope.initTasks();
-                            ui.item.sortable.cancel();
-                        } else {
-                            //TODO dit kan korter
-                            switch (ui.item.sortable.droptarget[0].id) {
-                                case 'folder-' + SOMEDAY:
-                                    var tasksfolder = getTaskFolder($scope.filter.mailbox, $scope.config.SOMEDAY_FOLDER.NAME);
-                                    var newstatus = $scope.config.STATUS.NOT_STARTED.VALUE;
-                                    break;
-                                case 'folder-' + BACKLOG:
-                                    var tasksfolder = getTaskFolder($scope.filter.mailbox, $scope.config.BACKLOG_FOLDER.NAME);
-                                    var newstatus = $scope.config.STATUS.NOT_STARTED.VALUE;
-                                    break;
-                                case 'folder-' + SPRINT:
-                                    var tasksfolder = getTaskFolder($scope.filter.mailbox, $scope.config.NEXT_FOLDER.NAME);
-                                    var newstatus = $scope.config.STATUS.NOT_STARTED.VALUE;
-                                    break;
-                                case 'folder-' + DOING:
-                                    var tasksfolder = getTaskFolder($scope.filter.mailbox, $scope.config.INPROGRESS_FOLDER.NAME);
-                                    var newstatus = $scope.config.STATUS.IN_PROGRESS.VALUE;
-                                    break;
-                                case 'folder-' + WAITING:
-                                    var tasksfolder = getTaskFolder($scope.filter.mailbox, $scope.config.WAITING_FOLDER.NAME);
-                                    var newstatus = $scope.config.STATUS.WAITING.VALUE;
-                                    break;
-                                case 'folder-' + DONE:
-                                    var tasksfolder = getTaskFolder($scope.filter.mailbox, $scope.config.COMPLETED_FOLDER.NAME);
-                                    var newstatus = $scope.config.STATUS.COMPLETED.VALUE;
-                                    break;
-                            };
+                        var folderFrom;
+                        var folderTo;
+                        for (var i = SOMEDAY; i <= DONE ; i++) {
+                           if (ui.item.sortable.source.attr('id') === ('folder-' + i)) folderFrom = i;
+                           if (ui.item.sortable.droptarget.attr('id') === ('folder-' + i)) folderTo = i;
+                        }
+                        if (folderFrom !== folderTo) {
+                            if ($scope.taskFolders[folderTo].limit !== 0
+                                && $scope.taskFolders[folderTo].tasks.length > $scope.taskFolders[folderTo].limit) {
+                                alert('Sorry, you reached the defined limit of this folder')
+                                ui.item.sortable.cancel();
+                            } else {
+                                var newfolder = getTaskFolder($scope.filter.mailbox, $scope.taskFolders[folderTo].name);
+                                var newstatus = $scope.taskFolders[folderTo].initialStatus;
 
-                            // locate the task in outlook namespace by using unique entry id
-                            var taskitem = getTaskItem(ui.item.sortable.model.entryID);
-                            var itemChanged = false;
+                                // locate the task in outlook namespace by using unique entry id
+                                var taskitem = getTaskItem(ui.item.sortable.model.entryID);
 
-                            // set new status, if different
-                            if (taskitem.Status != newstatus) {
-                                taskitem.Status = newstatus;
-                                taskitem.Save();
-                                itemChanged = true;
-                                ui.item.sortable.model.status = taskStatusText(newstatus);
-                                ui.item.sortable.model.completeddate = new Date(taskitem.DateCompleted)
-                            }
+                                // set new status, if different
+                                if (taskitem.Status != newstatus) {
+                                    taskitem.Status = newstatus;
+                                    taskitem.Save();
+                                    ui.item.sortable.model.status = taskStatusText(newstatus);
+                                    ui.item.sortable.model.completeddate = new Date(taskitem.DateCompleted)
+                                }
 
-                            // ensure the task is not moving into same folder
-                            if (taskitem.Parent.Name != tasksfolder.Name) {
-                                // move the task item
-                                taskitem = taskitem.Move(tasksfolder);
-                                itemChanged = true;
+                                // move the task item if it has to go another Outlook tasks folder
+                                if (newfolder != $scope.taskFolders[folderFrom].name) {
+                                    taskitem = taskitem.Move(newfolder);
+                                }
 
                                 // update entryID with new one (entryIDs get changed after move)
                                 // https://msdn.microsoft.com/en-us/library/office/ff868618.aspx
                                 ui.item.sortable.model.entryID = taskitem.EntryID;
                             }
 
-                            if (itemChanged) {
-                                $scope.initTasks();
-                            }
+                            $scope.getTasks(folderFrom, true);
+                            $scope.getTasks(folderTo, true);
+                            $scope.applyFilters();
                         }
                     }
                 } catch (error) {
                     writeLog('drag and drop: ' + error)
                 }
-
             }
         };
 
@@ -275,7 +235,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
     };
 
-    var getTasksFromOutlook = function (path, sort, folderStatus) {
+    var getTasksFromOutlook = function (path, sort, folderStatus, ignoreStatus) {
         try {
             var i, j, cats, array = [];
             var tasks = getTaskItems($scope.filter.mailbox, path);
@@ -283,7 +243,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             var count = tasks.Count;
             for (i = 1; i <= count; i++) {
                 var task = tasks(i);
-                if (task.Status == folderStatus || folderStatus == -1) {
+                if (task.Status == folderStatus || ignoreStatus == true) {
                     array.push({
                         entryID: task.EntryID,
                         subject: task.Subject,
@@ -344,7 +304,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         try {
             $scope.taskFolders.forEach(function (taskFolder) {
                 if (taskFolder.display === true) {
-                    $scope.getTasks(taskFolder.type, true);
+                    $scope.getTasks(taskFolder.type, false);
                 }
             });
         } catch (error) {
@@ -358,7 +318,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                var name = $scope.taskFolders[type].name;
                var sort = $scope.taskFolders[type].sort;
                var initialStatus = $scope.taskFolders[type].initialStatus;
-               $scope.taskFolders[type].tasks = getTasksFromOutlook(name, sort, initialStatus);
+               var ignoreStatus = false;
+               if (type == SOMEDAY || type == BACKLOG) ignoreStatus = true;
+               $scope.taskFolders[type].tasks = getTasksFromOutlook(name, sort, initialStatus, ignoreStatus);
                $scope.taskFolders[type].filteredTasks = $scope.taskFolders[type].tasks;
            }
         } catch (error) {
@@ -417,6 +379,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 if (movedTask) {
                     $scope.getTasks(BACKLOG, true)
                     $scope.getTasks(SPRINT, true)
+                    $scope.applyFilters();
                 }
             }
             // move tasks with start date today to the Next folder
@@ -442,6 +405,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 if (movedTask) {
                     $scope.getTasks(BACKLOG, true)
                     $scope.getTasks(SPRINT, true)
+                    $scope.applyFilters();
                 }
             }
             // move tasks with past due date to the Next folder
@@ -467,6 +431,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 if (movedTask) {
                     $scope.getTasks(BACKLOG, true)
                     $scope.getTasks(SPRINT, true)
+                    $scope.applyFilters();
                 }
             }
             // move tasks with start date in future back to the Backlog folder
@@ -492,6 +457,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 if (movedTask) {
                     $scope.getTasks(BACKLOG, true)
                     $scope.getTasks(SPRINT, true)
+                    $scope.applyFilters();
                 }
             }
         } catch (error) {
@@ -1031,7 +997,6 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         try {
             $scope.taskFolders[SOMEDAY].type = SOMEDAY;
             $scope.taskFolders[SOMEDAY].initialStatus = $scope.config.STATUS.NOT_STARTED.VALUE;
-            $scope.taskFolders[SOMEDAY].initialStatus = -1;
             $scope.taskFolders[SOMEDAY].display = $scope.config.SOMEDAY_FOLDER.ACTIVE;
             $scope.taskFolders[SOMEDAY].name = $scope.config.SOMEDAY_FOLDER.NAME;
             $scope.taskFolders[SOMEDAY].title = $scope.config.SOMEDAY_FOLDER.TITLE;
@@ -1049,7 +1014,6 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             $scope.taskFolders[BACKLOG].type = BACKLOG;
             $scope.taskFolders[BACKLOG].initialStatus = $scope.config.STATUS.NOT_STARTED.VALUE;
-            $scope.taskFolders[BACKLOG].initialStatus = -1;
             $scope.taskFolders[BACKLOG].display = $scope.config.BACKLOG_FOLDER.ACTIVE;
             $scope.taskFolders[BACKLOG].name = $scope.config.BACKLOG_FOLDER.NAME;
             $scope.taskFolders[BACKLOG].title = $scope.config.BACKLOG_FOLDER.TITLE;
