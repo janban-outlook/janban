@@ -344,7 +344,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         try {
             $scope.taskFolders.forEach(function (taskFolder) {
                 if (taskFolder.display === true) {
-                    $scope.getTasks(taskFolder.type, false);
+                    $scope.getTasks(taskFolder.type, true);
                 }
             });
         } catch (error) {
