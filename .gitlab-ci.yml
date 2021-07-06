@@ -16,17 +16,17 @@ deploy_test:
     - mv kanban.html index.html
     - curl -T index.html $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T janban-icon-512.jpg $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/angular.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/angular.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/bootstrap.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/deep-diff-0.3.8.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/checklist-model.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/jquery.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/jquery-ui.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/minify.json.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/moment.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/sortable.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lib/sortable.min.js $FTPSITE/janban-test/lib/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/angular.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/angular.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/bootstrap.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/deep-diff-0.3.8.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/checklist-model.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/jquery.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/jquery-ui.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/minify.json.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/moment.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/sortable.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T lip/sortable.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T js/app.js $FTPSITE/janban-test/js/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T js/exchange.js $FTPSITE/janban-test/js/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T js/version.js $FTPSITE/janban-test/js/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
@@ -37,46 +37,6 @@ deploy_test:
     - curl -T fonts/glyphicons-halflings-regular.ttf $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T fonts/glyphicons-halflings-regular.woff $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T fonts/glyphicons-halflings-regular.woff2 $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-
-deploy_next:
-  stage: deploy
-  image: debian:jessie
-  only: 
-    - next
-  script:
-    - apt-get -u update
-    - apt-get -y install curl zip
-    - sed -i "s|#WHATSNEW#|$WHATSNEW|" js/app.js
-    - sed -i "s|#VERSION#|$VERSION|" js/app.js
-    - sed -i "s|#DOWNLOAD#|$DOWNLOAD|" js/app.js
-    - curl -T whatsnew.html $FTPSITE/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - mv kanban.html index.html
-    - zip -r  janban-next.zip *
-    - curl -T janban-next.zip $FTPSITE --user $FTPUSER:$FTPPWD
-    - curl -T index.html $FTPSITE --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T janban-icon-512.jpg $FTPSITE --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/angular.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/angular.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/bootstrap.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/deep-diff-0.3.8.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/checklist-model.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/jquery.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/jquery-ui.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/minify.json.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/moment.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/sortable.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T lib/sortable.min.js $FTPSITE/lib/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T js/app.js $FTPSITE/js/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T js/exchange.js $FTPSITE/js/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T js/version.js $FTPSITE/js/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T css/bootstrap.min.css $FTPSITE/css/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T css/taskboard.css $FTPSITE/css/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T fonts/glyphicons-halflings-regular.eot $FTPSITE/fonts/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T fonts/glyphicons-halflings-regular.svg $FTPSITE/fonts/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T fonts/glyphicons-halflings-regular.ttf $FTPSITE/fonts/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T fonts/glyphicons-halflings-regular.woff $FTPSITE/fonts/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T fonts/glyphicons-halflings-regular.woff2 $FTPSITE/fonts/ --user $FTPUSERNEXT:$FTPPWDNEXT
-    - curl -T install.cmd $FTPSITE --user $FTPUSERNEXT:$FTPPWDNEXT
 
 deploy:
   stage: deploy
@@ -113,19 +73,17 @@ deploy:
     - mv kanban.html index.html
     - curl -T index.html $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T janban-icon-512.jpg $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - ls $FTPSITE/lib
-    - ls $FTPSITE/lib/
-    - curl -T lib/angular.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/angular.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/bootstrap.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/deep-diff-0.3.8.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/checklist-model.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/jquery.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/jquery-ui.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/minify.json.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/moment.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/sortable.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lib/sortable.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/angular.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/angular.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/bootstrap.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/deep-diff-0.3.8.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/checklist-model.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/jquery.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/jquery-ui.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/minify.json.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/moment.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/sortable.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T lip/sortable.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T js/app.js $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T js/exchange.js $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T js/version.js $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
