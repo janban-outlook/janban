@@ -1426,7 +1426,6 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             	   isChanged = true;
             	};
             };
-
             if (isChanged) {
             	 $scope.config.ACTIVE_MAILBOXES = newArray;
                 saveConfig();
@@ -1441,9 +1440,13 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     
     var find = function (arr, value) {
        var result = false;
+        try {
        arr.forEach( function(elem) {
           if (elem === value) result = true;
        });
+        }
+        catch(error) {
+        }
        return result;
     }
 
