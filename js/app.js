@@ -14,9 +14,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     const CONFIG_MODE = 1;
     const HELP_MODE = 2;
 
-    const STATE_ID = "KanbanState";
-    const CONFIG_ID = "KanbanConfig";
-    const LOG_ID = "KanbanErrorLog";
+    const STATE_ID = "TEST-KanbanState";
+    const CONFIG_ID = "TEST-KanbanConfig";
+    const LOG_ID = "TEST-KanbanErrorLog";
 
     const SOMEDAY = 0;
     const BACKLOG = 1;
@@ -93,6 +93,10 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
         $scope.switchToAppMode();
 
+        getConfig();
+        getState();
+        getVersion();
+
         // watch search filter and apply it
         $scope.$watchGroup(['filter.search', 'filter.private', 'filter.category'], function (newValues, oldValues) {
             var search = newValues[0];
@@ -120,9 +124,12 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             $scope.mailboxes.push(box);
         });
 
-        getConfig();
         getState();
-        getVersion();
+
+        // xxxxxxxxxx
+        //getConfig();
+        //getState();
+        //getVersion();
 
         applyConfig();
         $scope.displayFolderCount = 0;
@@ -1253,7 +1260,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             "AUTO_START_DUE_TASKS": false,
             "LOG_ERRORS": false,
             "MULTI_MAILBOX": false,
-            "ACTIVE_MAILBOXES": [$scope.mailboxes[0]],
+            "ACTIVE_MAILBOXES": [],
             "NEW_VERSION_NOTIFICATION": true
         }
     }
@@ -1287,7 +1294,11 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             // check state.mailbox; if it is not found in the *active* mailboxes array
             // then take the default mailbox
             if (!$scope.contains($scope.config.ACTIVE_MAILBOXES, state.mailbox)) {
-                state.mailbox = $scope.mailboxes[0];
+                try {
+                    state.mailbox = $scope.mailboxes[0];
+                }
+                catch(error) {
+                }
             }
 
             $scope.filter =
