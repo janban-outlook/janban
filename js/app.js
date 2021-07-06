@@ -14,9 +14,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     const CONFIG_MODE = 1;
     const HELP_MODE = 2;
 
-    const STATE_ID = "TEST-KanbanState";
-    const CONFIG_ID = "TEST-KanbanConfig";
-    const LOG_ID = "TEST-KanbanErrorLog";
+    const STATE_ID = "KanbanState";
+    const CONFIG_ID = "KanbanConfig";
+    const LOG_ID = "KanbanErrorLog";
 
     const SOMEDAY = 0;
     const BACKLOG = 1;
