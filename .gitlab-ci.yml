@@ -113,7 +113,8 @@ deploy:
     - mv kanban.html index.html
     - curl -T index.html $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T janban-icon-512.jpg $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - ls lib
+    - ls $FTPSITE/lib
+    - ls $FTPSITE/lib/
     - curl -T lib/angular.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T lib/angular.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
     - curl -T lib/bootstrap.min.js $FTPSITE/lib/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
