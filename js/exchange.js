@@ -48,7 +48,7 @@ function getOutlookMailboxes(multiMailbox) {
     var folders = outlookNS.Folders;
     var count = folders.count;
     mailboxNames.length = count;
-    mailboxNames[mi] = fixMailboxName(getDefaultMailbox().Name);
+    mailboxNames[0] = fixMailboxName(getDefaultMailbox().Name);
     if (!multiMailbox) 
     { 
         mailboxNames.length = 1;
@@ -59,8 +59,8 @@ function getOutlookMailboxes(multiMailbox) {
             var acc = folders.Item(i).Name;
             if (acc.indexOf("Internet Calendar") == -1) {
                 if (acc != mailboxNames[0]) {
-                    mi++;
                     if (hasTasksFolder(folders.Item(i))) {
+                        mi++;
                         mailboxNames[mi] = fixMailboxName(acc);
                     }
                 }

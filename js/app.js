@@ -10,6 +10,12 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
     var noteItem;
     var timeout;
 
+    var hasReadState; hasReadState = false;
+    var hasReadConfig; hasReadConfig = false;
+    var hasReadVersion; hasReadVersion = false;
+
+    const debug_mode = false;
+
     const APP_MODE = 0;
     const CONFIG_MODE = 1;
     const HELP_MODE = 2;
@@ -93,20 +99,23 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
         $scope.switchToAppMode();
 
-        getConfig();
-        getState();
-        getVersion();
-
         // watch search filter and apply it
         $scope.$watchGroup(['filter.search', 'filter.private', 'filter.category'], function (newValues, oldValues) {
-            var search = newValues[0];
-            $scope.applyFilters();
-            saveState();
+            var isSearchChanged = (newValues[0] != oldValues[0]);
+            var isPrivateChanged = (newValues[1] != oldValues[1]); 
+            var isCategoryChanged = (newValues[2] != oldValues[2]); 
+            if (isSearchChanged || isPrivateChanged || isCategoryChanged) {
+                $scope.applyFilters();
+                saveState();
+            }
         });
 
         $scope.$watch('filter.mailbox', function (newValue, oldValue) {
-            $scope.initTasks();
-            saveState();
+            if (newValue != oldValue) {
+                $scope.wipeTasks();
+                $scope.initTasks();
+                saveState();
+            }
         });
 
         $scope.categories = ["<All Categories>", "<No Category>"];
@@ -116,22 +125,17 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         });
         $scope.categories = $scope.categories.sort();
 
-        var multiMailbox = JSON.parse(JSON.minify(getJournalItem(CONFIG_ID))).MULTI_MAILBOX;
-        
         $scope.mailboxes = [];
-        outlookMailboxes = getOutlookMailboxes(multiMailbox);
+        outlookMailboxes = getOutlookMailboxes(true);
         outlookMailboxes.forEach(function (box) {
             $scope.mailboxes.push(box);
         });
 
-        getState();
-
-        // xxxxxxxxxx
-        //getConfig();
-        //getState();
-        //getVersion();
-
+        readConfig();
         applyConfig();
+        readState();
+        readVersion();
+
         $scope.displayFolderCount = 0;
         $scope.taskFolders.forEach(function (folder) {
             if (folder.display) $scope.displayFolderCount++;
@@ -318,6 +322,16 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             writeLog('readTasks: '+ error)
         }
     }
+
+    $scope.wipeTasks = function () {
+        try {
+            $scope.taskFolders.forEach(function (taskFolder) {
+                $scope.taskFolders[taskFolder.type].tasks = undefined;
+            })
+        } catch (error) {
+            writeLog('wipeTasks: '+ error)
+        }
+    } 
     
     $scope.getTasks = function (type, reread) {
         try {
@@ -492,6 +506,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
     $scope.applyFilters = function () {
         try {
+            readState();
+
             if ($scope.filter.search.length > 0) {
                 $scope.taskFolders.forEach(function (taskFolder) {
                     taskFolder.filteredTasks = $filter('filter')(taskFolder.tasks, $scope.filter.search);
@@ -947,7 +963,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             if ($scope.config.DARK_MODE)
                 return { "background-color": '#6a6a6a' }
         } catch (error) {
-            writeLog('getTaskgroundBackgroundColor: ' + error)
+            writeLog('getTaskboardBackgroundColor: ' + error)
         }
     };
 
@@ -1265,7 +1281,10 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
     }
 
-    var getState = function () {
+    var readState = function () {
+        if (hasReadState){
+            return;
+        }
         try {
             var state = { 
                 "private": "0", 
@@ -1286,18 +1305,16 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
 
             $scope.prevState = state;
 
-            // handle backwards compatibility
-            if (state.private === true) state.private = $scope.privacyFilter.private.value;
-            if (state.private === false) state.private = $scope.privacyFilter.public.value;
-            if (state.category === undefined) state.category = '<All Categories>';
-
             // check state.mailbox; if it is not found in the *active* mailboxes array
             // then take the default mailbox
+            var isChanged = false;
             if (!$scope.contains($scope.config.ACTIVE_MAILBOXES, state.mailbox)) {
                 try {
                     state.mailbox = $scope.mailboxes[0];
+                    isChanged = true;
                 }
                 catch(error) {
+                    debug_alert('set state.mailbox error: '+error)
                 }
             }
 
@@ -1309,9 +1326,15 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                     mailbox: state.mailbox
                 };
 
+            if (isChanged) {
+                state.mailbox = ''; // sneaky, but otherwise nothing will be saved
+                saveState();
+            }
+
         } catch (error) {
-            writeLog('getState: ' + error)
+            writeLog('readState: ' + error)
         }
+        hasReadState = true;
     }
 
     $scope.contains = function (a, obj) {
@@ -1346,8 +1369,11 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
     }
 
-    var getConfig = function () {
+    var readConfig = function () {
         try {
+            if (hasReadConfig) {
+                return;
+            }
             $scope.previousConfig = null;
             $scope.configRaw = getJournalItem(CONFIG_ID);
             if ($scope.configRaw !== null) {
@@ -1356,7 +1382,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 }
                 catch (e) {
                     alert("I am afraid there is something wrong with the json structure of your configuration data. Please correct it.");
-                    writeLog('getConfig JSON parse error: ' + e)
+                    writeLog('readConfig JSON parse error: ' + e)
                     $scope.switchToConfigMode();
                     return;
                 }
@@ -1369,8 +1395,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 saveConfig();
             }
         } catch (error) {
-            writeLog('getConfig: ' + error)
+            writeLog('readConfig: ' + error)
         }
+        hasReadConfig = true;
     }
 
     var saveConfig = function () {
@@ -1410,6 +1437,14 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         try {
             var isChanged = false;
             
+            if ($scope.config.ACTIVE_MAILBOXES.length == 0) {
+                $scope.config.ACTIVE_MAILBOXES.length = 1;
+                $scope.config.ACTIVE_MAILBOXES[0] = $scope.mailboxes[0];
+                saveConfig();
+                // as long as we need configraw...
+                $scope.configRaw = getJournalItem(CONFIG_ID);
+            }
+
             var newArray = [];
             var i;
             for (i = 0; i < $scope.config.ACTIVE_MAILBOXES.length; i++) {
@@ -1489,8 +1524,17 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         $scope.WHATSNEW_URL = '#WHATSNEW#';
         $scope.version = VERSION;
     }
-    
-    var getVersion = function () {
+
+    var debug_alert = function (msg) {
+        if (debug_mode) {
+            alert(msg)
+        }
+    };    
+
+    var readVersion = function () {
+        if (hasReadVersion) {
+            return $scope.version_number;
+        }
         try {
             $http.get($scope.VERSION_URL, { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } })
                 .then(function (response) {
@@ -1498,8 +1542,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                     $scope.version_number = $scope.version_number.replace(/\n|\r/g, "");
                     checkVersion();
 				});
+            hasReadVersion = true;
         } catch (error) {
-            writeLog('getVersion: ' + error)
+            writeLog('readVersion: ' + error)
         }
     };
 
