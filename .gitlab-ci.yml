@@ -12,9 +12,8 @@ deploy_test:
     - sed -i "s|#WHATSNEW#|$WHATSNEW|" js/app.js
     - sed -i "s|#VERSION#|$VERSION|" js/app.js
     - sed -i "s|#DOWNLOAD#|$DOWNLOAD|" js/app.js
-    - curl -T whatsnew.html $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - mv kanban.html index.html
-    - curl -T index.html $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
+    - curl -T "{index.html,whatsnew.html}" $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T janban-icon-512.jpg $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl -T lip/angular.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
     - curl --connect-timeout 600 -T lip/angular.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
@@ -58,9 +57,7 @@ deploy:
     - sed -i "s|#DOWNLOAD#|$DOWNLOAD|" js/app.js
     - sed 's/";//g' js/version.js > version.txt1
     - sed 's/const VERSION = "//g' version.txt1 > version.txt
-    - curl -T version.txt $FTPSITE --user $FTPUSER:$FTPPWD
-    - curl -T whatsnew.html $FTPSITE --user $FTPUSER:$FTPPWD
-    - curl -T upgrade.html $FTPSITE --user $FTPUSER:$FTPPWD
+    - curl -T "{upgrade.html,whatsnew.html,version.txt}" $FTPSITE --user $FTPUSER:$FTPPWD
     - rm version.txt
     - rm version.txt1
     - rm whatsnew.html
@@ -69,29 +66,9 @@ deploy:
     - curl -T install.zip $FTPSITE --user $FTPUSER:$FTPPWD
     - rm install.zip
     - zip -r  janban.zip *
-    - curl -T janban.zip $FTPSITE --user $FTPUSER:$FTPPWD
     - mv kanban.html index.html
-    - curl -T index.html $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T janban-icon-512.jpg $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/angular.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/angular.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/bootstrap.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/deep-diff-0.3.8.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/checklist-model.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/jquery.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/jquery-ui.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/minify.json.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/moment.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/sortable.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T lip/sortable.min.js $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T js/app.js $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T js/exchange.js $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T js/version.js $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T css/bootstrap.min.css $FTPSITE/css/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T css/taskboard.css $FTPSITE/css/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T fonts/glyphicons-halflings-regular.eot $FTPSITE/fonts/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T fonts/glyphicons-halflings-regular.svg $FTPSITE/fonts/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T fonts/glyphicons-halflings-regular.ttf $FTPSITE/fonts/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T fonts/glyphicons-halflings-regular.woff $FTPSITE/fonts/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T fonts/glyphicons-halflings-regular.woff2 $FTPSITE/fonts/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
-    - curl -T install.cmd $FTPSITE --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T "{install.cmd,janban-icon-512.jpg,index.html,janban.zip}" $FTPSITE --user $FTPUSER:$FTPPWD
+    - curl -T "{lip/sortable.min.jslip/sortable.js,lip/moment.min.js,lip/minify.json.js,lip/jquery-ui.min.js,lip/jquery.min.js,lip/checklist-model.js,lip/deep-diff-0.3.8.min.js,lip/bootstrap.min.js,lip/angular.min.js,lip/angular.js}" $FTPSITE/lip/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T "{js/version.js,js/exchange.js,js/app.js}" $FTPSITE/js/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T "{css/taskboard.css,css/bootstrap.min.css}" $FTPSITE/css/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
+    - curl -T "{fonts/glyphicons-halflings-regular.woff2,fonts/glyphicons-halflings-regular.woff,fonts/glyphicons-halflings-regular.ttf,fonts/glyphicons-halflings-regular.svg,fonts/glyphicons-halflings-regular.eot}" $FTPSITE/fonts/ --user $FTPUSERJANBAN:$FTPPWDJANBAN
