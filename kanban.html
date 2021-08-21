@@ -71,7 +71,7 @@
                         </div>
                         <div class="input-group-addon">
                             <button id="refreshbutton" class="btn btn-default btn-xs" aria-label="Refresh" type="button"
-                                                                                                           ng-click="initTasks();"><span class="glyphicon glyphicon-refresh"
+                                                                                                           ng-click="refreshTasks();"><span class="glyphicon glyphicon-refresh"
                                                                                                                                          aria-hidden="true"></span></button>
                         </div>
                         <div ng-show="(filter.search != '')" class="input-group-addon">
@@ -614,6 +614,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group row col-sm-12">
+                                            <label class="control-label col-sm-1">Automatic refresh:</label>
+                                            <div class="col-sm-1">
+                                                <input type="checkbox" ng-model="config.AUTO_REFRESH">
+                                            </div>
+                                            <div class="col-sm-1">every </div>
+                                            <div class="col-sm-1">
+                                                <input type="text" class="form-control input-sm"
+                                                                   ng-model="config.AUTO_REFRESH_MINUTES">
+                                            </div>
+                                            <div class="col-sm-5"> minutes</div>
+                                </div>
                                     </div>
                                 </div>
                             </div>

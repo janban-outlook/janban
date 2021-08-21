@@ -2,13 +2,14 @@
 
 var tbApp = angular.module('taskboardApp', ['ui.sortable','checklist-model']);
 
-tbApp.controller('taskboardController', function ($scope, $filter, $http) {
+tbApp.controller('taskboardController', function ($scope, $filter, $http, $interval) {
 
     var applMode;
     var outlookCategories;
     var outlookMailboxes;
     var noteItem;
     var timeout;
+    var refresh;
 
     var hasReadState; hasReadState = false;
     var hasReadConfig; hasReadConfig = false;
@@ -116,6 +117,20 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
                 $scope.initTasks();
                 saveState();
             }
+        });
+
+        $scope.$watchGroup(['config.AUTO_REFRESH','config.AUTO_REFRESH_MINUTES'], function (newValues, oldvLaues) {
+            if ($scope.config.AUTO_REFRESH_MINUTES < 1) {
+                $scope.config.AUTO_REFRESH_MINUTES = 1;
+            }
+            if (refresh != undefined) {
+                $interval.cancel(refresh);
+            }
+            refresh = $interval( function () {
+                if ($scope.config.AUTO_REFRESH) {
+                    $scope.refreshTasks();
+                }
+            }, $scope.config.AUTO_REFRESH_MINUTES * 60000);
         });
 
         $scope.categories = ["<All Categories>", "<No Category>"];
@@ -333,6 +348,11 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
         }
     } 
     
+    $scope.refreshTasks = function () {
+        $scope.wipeTasks();
+        $scope.initTasks();
+    }
+
     $scope.getTasks = function (type, reread) {
         try {
            if (typeof $scope.taskFolders[type].tasks === 'undefined' || reread == true) {
@@ -1277,7 +1297,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http) {
             "LOG_ERRORS": false,
             "MULTI_MAILBOX": false,
             "ACTIVE_MAILBOXES": [],
-            "NEW_VERSION_NOTIFICATION": true
+            "NEW_VERSION_NOTIFICATION": true,
+            "AUTO_REFRESH": true,
+            "AUTO_REFRESH_MINUTES": 5
         }
     }
 
