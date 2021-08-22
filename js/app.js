@@ -1483,6 +1483,10 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
             	   isChanged = true;
             	};
             };
+            if (!find($scope.config.ACTIVE_MAILBOXES, $scope.mailboxes[0])) {
+                newArray.push($scope.mailboxes[0]);
+                isChanged = true;
+            }
             if (isChanged) {
             	 $scope.config.ACTIVE_MAILBOXES = newArray;
                 saveConfig();
