@@ -597,6 +597,14 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     return days < $scope.config.COMPLETED.AFTER_X_DAYS;
                 });
             }
+
+			// filter backlog tasks to show only NOT STARTED
+			if ('folder-' + BACKLOG){
+				$scope.taskFolders[BACKLOG].filteredTasks = $filter('filter')($scope.taskFolders[BACKLOG].filteredTasks, function (task) {
+					return task.status == "Not Started";
+				});
+			}
+
         } catch (error) {
             writeLog('applyFilters: ' + error)
         }
