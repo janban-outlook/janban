@@ -557,6 +557,12 @@
                                             </div>
                                             <div class="col-sm-5"> (max number of character displayed)</div>
                                         </div>
+                                        <div class="form-group row col-sm-12">
+                                            <label class="control-label col-sm-1">Task body in report:</label>
+                                            <div class="col-sm-1">
+                                                <input type="checkbox" ng-model="config.TASKBODY_IN_REPORT">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -589,6 +595,13 @@
                                             <div class="col-sm-10"> (Automatically move tasks to {{config.NEXT_FOLDER.TITLE}} column
                                                 when
                                                 its Due Date has arrived)</div>
+                                        </div>
+                                        <div class="form-check row col-sm-12">
+                                            <label class="control-label col-sm-1">Save drag-and-drop order:</label>
+                                            <div class="col-sm-1">
+                                                <input type="checkbox" ng-model="config.SAVE_ORDER">
+                                            </div>
+                                            <div class="col-sm-10"> (Remember the drag-and-drop sort order)</div>
                                         </div>
                                         <div class="form-check row col-sm-12">
                                             <label class="control-label col-sm-1">Remember state:</label>

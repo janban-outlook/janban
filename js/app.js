@@ -207,6 +207,9 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                             $scope.getTasks(folderTo, true);
                             $scope.applyFilters();
                         }
+                        else {
+                            if ($scope.config.SAVE_ORDER) { $scope.fixOrder(ui.item.sortable.droptargetModel); }
+                        }
                     }
                 } catch (error) {
                     writeLog('drag and drop: ' + error)
@@ -215,6 +218,22 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
         };
 
        $scope.initTasks();
+    };
+
+    $scope.fixOrder = function (tasks) {
+    try {
+        var count = tasks.length;
+        for (var i = 0; i < count; i++) {
+            // locate the task in outlook namespace by using unique entry id
+            var taskitem = getTaskItem(tasks[i].entryID);
+
+            // save the new order
+            taskitem.Ordinal = i;
+            taskitem.Save();
+            }
+        } catch (error) {
+            writeLog('fixOrder: '+ error)
+        }
     };
 
     $scope.submitConfig = function () {
@@ -286,6 +305,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                         percent: task.PercentComplete,
                         owner: task.Owner,
                         totalwork: task.TotalWork,
+                        ordinal: task.Ordinal,
                     });
                 }
                 cats = task.Categories.split(/[;,]+/);
@@ -303,6 +323,7 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
             var sortKeys;
             if (sort === undefined) { sortKeys = ["-priority"]; }
             else { sortKeys = sort.split(","); }
+            if ($scope.config.SAVE_ORDER) { sortKeys.unshift("ordinal"); }
 
             var sortedTasks = array.sort(fieldSorter(sortKeys));
 
@@ -598,12 +619,12 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                 });
             }
 
-			// filter backlog tasks to show only NOT STARTED
-			if ('folder-' + BACKLOG){
-				$scope.taskFolders[BACKLOG].filteredTasks = $filter('filter')($scope.taskFolders[BACKLOG].filteredTasks, function (task) {
-					return task.status == "Not Started";
-				});
-			}
+            // filter backlog tasks to show only NOT STARTED
+            if ('folder-' + BACKLOG){
+                $scope.taskFolders[BACKLOG].filteredTasks = $filter('filter')($scope.taskFolders[BACKLOG].filteredTasks, function (task) {
+                    return task.status == "Not Started";
+                });
+            }
 
         } catch (error) {
             writeLog('applyFilters: ' + error)
@@ -677,7 +698,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     if (tasks(i).Importance == 0) { mailBody += "<font color=gray> [L]</font>"; }
                     var dueDate = new Date(tasks(i).DueDate);
                     if (moment(dueDate).isValid && moment(dueDate).year() != 4501) { mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]"; }
-                    if (taskBodyNotes(tasks(i).Body, 10000)) { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
+                    if (taskBodyNotes(tasks(i).Body, 10000) && $scope.config.TASKBODY_IN_REPORT)
+                        { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
                     mailBody += "</li>";
                 }
                 mailBody += "</ul>";
@@ -699,7 +721,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     if (tasks(i).Importance == 0) { mailBody += "<font color=gray> [L]</font>"; }
                     var dueDate = new Date(tasks(i).DueDate);
                     if (moment(dueDate).isValid && moment(dueDate).year() != 4501) { mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]"; }
-                    if (taskBodyNotes(tasks(i).Body, 10000)) { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
+                    if (taskBodyNotes(tasks(i).Body, 10000) && $scope.config.TASKBODY_IN_REPORT)
+                        { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
                     mailBody += "</li>";
                 }
                 mailBody += "</ul>";
@@ -721,7 +744,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     if (tasks(i).Importance == 0) { mailBody += "<font color=gray> [L]</font>"; }
                     var dueDate = new Date(tasks(i).DueDate);
                     if (moment(dueDate).isValid && moment(dueDate).year() != 4501) { mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]"; }
-                    if (taskBodyNotes(tasks(i).Body, 10000)) { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
+                    if (taskBodyNotes(tasks(i).Body, 10000) && $scope.config.TASKBODY_IN_REPORT)
+                        { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
                     mailBody += "</li>";
                 }
                 mailBody += "</ul>";
@@ -743,7 +767,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     if (tasks(i).Importance == 0) { mailBody += "<font color=gray> [L]</font>"; }
                     var dueDate = new Date(tasks(i).DueDate);
                     if (moment(dueDate).isValid && moment(dueDate).year() != 4501) { mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]"; }
-                    if (taskBodyNotes(tasks(i).Body, 10000)) { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
+                    if (taskBodyNotes(tasks(i).Body, 10000) && $scope.config.TASKBODY_IN_REPORT)
+                        { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
                     mailBody += "</li>";
                 }
                 mailBody += "</ul>";
@@ -765,7 +790,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     if (tasks(i).Importance == 0) { mailBody += "<font color=gray> [L]</font>"; }
                     var dueDate = new Date(tasks(i).DueDate);
                     if (moment(dueDate).isValid && moment(dueDate).year() != 4501) { mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]"; }
-                    if (taskBodyNotes(tasks(i).Body, 10000)) { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
+                    if (taskBodyNotes(tasks(i).Body, 10000) && $scope.config.TASKBODY_IN_REPORT)
+                        { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
                     mailBody += "</li>";
                 }
                 mailBody += "</ul>";
@@ -787,7 +813,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                     if (tasks(i).Importance == 0) { mailBody += "<font color=gray> [L]</font>"; }
                     var dueDate = new Date(tasks(i).DueDate);
                     if (moment(dueDate).isValid && moment(dueDate).year() != 4501) { mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]"; }
-                    if (taskBodyNotes(tasks(i).Body, 10000)) { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
+                    if (taskBodyNotes(tasks(i).Body, 10000) && $scope.config.TASKBODY_IN_REPORT)
+                        { mailBody += "<br>" + "<font color=gray>" + taskBodyNotes(tasks(i).Body, 10000) + "</font>"; }
                     mailBody += "</li>";
                 }
                 mailBody += "</ul>";
@@ -1272,11 +1299,13 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
                 "NAME": "Completed"
             },
             "TASKNOTE_MAXLEN": 100,
+            "TASKBODY_IN_REPORT": true,
             "DATE_FORMAT": "dd-MMM",
             "USE_CATEGORY_COLORS": true,
             "USE_CATEGORY_COLOR_FOOTERS": false,
             "DARK_MODE": false,
             "SAVE_STATE": true,
+            "SAVE_ORDER": false,
             "STATUS": {
                 "NOT_STARTED": {
                     "VALUE": 0,
