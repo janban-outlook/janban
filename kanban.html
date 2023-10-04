@@ -283,6 +283,13 @@
                                                                                                      ng-model="config.BACKLOG_FOLDER.TITLE">
                                                 </div>
                                             </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Folder name:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Folder Name"
+                                                                                                     ng-model="config.BACKLOG_FOLDER.NAME">
+                                                </div>
+                                            </div>
                                             <div class="form-check row col-sm-12">
                                                 <label class="control-label col-sm-1">Filter on Start Date:</label>
                                                 <div class="col-sm-1">
@@ -335,6 +342,13 @@
                                                 <div class="col-sm-2">
                                                     <input type="text" class="form-control" placeholder="Enter Title"
                                                                                             ng-model="config.NEXT_FOLDER.TITLE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Name:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control" placeholder="Enter Folder Name"
+                                                                                            ng-model="config.NEXT_FOLDER.NAME">
                                                 </div>
                                             </div>
                                             <div class="form-check row col-sm-12">
@@ -390,6 +404,13 @@
                                                 <div class="col-sm-2">
                                                     <input type="text" class="form-control input-sm" placeholder="Enter Title"
                                                                                                      ng-model="config.INPROGRESS_FOLDER.TITLE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Folder name:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Folder Name"
+                                                                                                     ng-model="config.INPROGRESS_FOLDER.NAME">
                                                 </div>
                                             </div>
                                             <div class="form-check row col-sm-12">
@@ -490,6 +511,13 @@
                                                 <div class="col-sm-2">
                                                     <input type="text" class="form-control input-sm" placeholder="Enter Title"
                                                                                                      ng-model="config.COMPLETED_FOLDER.TITLE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Folder name:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Folder Name"
+                                                                                                     ng-model="config.COMPLETED_FOLDER.NAME">
                                                 </div>
                                             </div>
                                             <div class="form-check row col-sm-12">
@@ -634,6 +662,13 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-check row col-sm-12">
+                                            <label class="control-label col-sm-1">Load done tasks:</label>
+                                            <div class="col-sm-1">
+                                                <input type="checkbox" ng-model="config.LOAD_COMPLETED_TASKS">
+                                            </div>
+                                            <div class="col-sm-10"> (If you have a large list of completed tasks, this will improve the app load time)</div>
+                                        </div>
                                         <div class="form-group row col-sm-12">
                                             <label class="control-label col-sm-1">Automatic refresh:</label>
                                             <div class="col-sm-1">
@@ -681,7 +716,7 @@
                                         <div class="form-check row col-sm-12">
                                             <label class="control-label col-sm-1">Multiple mailboxes:</label>
                                             <div class="col-sm-1">
-                                                <input type="checkbox" ng-model="config.MULTI_MAILBOX">
+                                                <input type="checkbox" ng-model="config.MULTI_MAILBOX" ng-change="displayMulti($event)">
                                             </div>
                                             <div class="col-sm-10">(Kanban boards for multiple mailboxes)</div>
                                         </div>
@@ -691,12 +726,19 @@
                                         <div ng-show="config.MULTI_MAILBOX" class="col-sm-12" ng-repeat="mailbox in mailboxes" ng-if="$index == 0">
                                             <input type="checkbox" class="col-sm-1" disabled="disabled" checklist-model="config.ACTIVE_MAILBOXES" checklist-value="mailbox">
                                             <label class="control-label ">{{mailbox}}</label>
-                                             (default, cannot be switched off)
+                                             (default, cannot be switched off) 
                                         </div>
                                         <div ng-show="config.MULTI_MAILBOX" class="col-sm-12" ng-repeat="mailbox in mailboxes" ng-if="$index > 0">
                                             <input type="checkbox" class="col-sm-1" checklist-model="config.ACTIVE_MAILBOXES" checklist-value="mailbox">
                                             <label class="control-label ">{{mailbox}}</label>
                                         </div>
+                                        <div class="form-check row col-sm-12">
+                                            <label class="control-label col-sm-1">Archive folder name:</label>
+                                            <div class="col-sm-1">
+                                                <input type="text" class="form-control input-sm"" ng-model="config.ARCHIVE_FOLDER.NAME">
+                                            </div>
+                                            <div class="col-sm-10">(Completed tasks are moved to this folder)</div>
+                                        </div>                                        
                                     </div>
                                 </div>
                             </div>
