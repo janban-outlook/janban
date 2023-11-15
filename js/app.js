@@ -104,12 +104,23 @@ tbApp.controller(
 
       // watch search filter and apply it
       $scope.$watchGroup(
-        ["filter.search", "filter.private", "filter.category"],
+        [
+          "filter.search",
+          "filter.private",
+          "filter.category",
+          "filter.project",
+        ],
         function (newValues, oldValues) {
           var isSearchChanged = newValues[0] != oldValues[0];
           var isPrivateChanged = newValues[1] != oldValues[1];
           var isCategoryChanged = newValues[2] != oldValues[2];
-          if (isSearchChanged || isPrivateChanged || isCategoryChanged) {
+          var isProjectChanged = newValues[3] != oldValues[3];
+          if (
+            isSearchChanged ||
+            isPrivateChanged ||
+            isCategoryChanged ||
+            isProjectChanged
+          ) {
             $scope.applyFilters();
             saveState();
           }
@@ -147,6 +158,11 @@ tbApp.controller(
         $scope.categories.push(name);
       });
       $scope.categories = $scope.categories.sort();
+
+      // Projects RD
+      $scope.projects = ["<All Projects>", "<No Project>"];
+      $scope.projects = $scope.projects.sort();
+
       $scope.mailboxes = [];
 
       // This is a way to go around the migrateCongif procedure. (What is it for?)
@@ -325,6 +341,7 @@ tbApp.controller(
         var i,
           j,
           cats,
+          proj,
           array = [];
         var tasks = getTaskItems($scope.filter.mailbox, path);
 
@@ -334,7 +351,8 @@ tbApp.controller(
           if (task.Status == folderStatus || ignoreStatus == true) {
             array.push({
               entryID: task.EntryID,
-              subject: task.Subject,
+              subject: getTaskSubject(task.Subject),
+              project: task.Companies,
               priority: task.Importance,
               startdate: new Date(task.StartDate),
               duedate: new Date(task.DueDate),
@@ -351,6 +369,7 @@ tbApp.controller(
               ordinal: task.Ordinal,
             });
           }
+
           cats = task.Categories.split(/[;,]+/);
           for (j = 0; j < cats.length; j++) {
             cats[j] = cats[j].trim();
@@ -358,6 +377,13 @@ tbApp.controller(
               if ($scope.activeCategories.indexOf(cats[j]) === -1) {
                 $scope.activeCategories.push(cats[j]);
               }
+            }
+          }
+
+          proj = task.Companies;
+          if (proj !== "") {
+            if ($scope.activeProjects.indexOf(proj) === -1) {
+              $scope.activeProjects.push(proj);
             }
           }
         }
@@ -374,7 +400,6 @@ tbApp.controller(
         }
 
         var sortedTasks = array.sort(fieldSorter(sortKeys));
-
         return sortedTasks;
       } catch (error) {
         writeLog("getTasksFromOutlook: " + error);
@@ -456,6 +481,9 @@ tbApp.controller(
         if (typeof $scope.activeCategories === "undefined") {
           $scope.activeCategories = ["<All Categories>", "<No Category>"];
         }
+        if (typeof $scope.activeProjects === "undefined") {
+          $scope.activeProjects = ["<All Projects>", "<No Project>"];
+        }
         $scope.readTasks();
         $scope.activeCategories = $scope.activeCategories.sort();
         // then apply the current filters for search and sensitivity
@@ -470,6 +498,7 @@ tbApp.controller(
           $scope.getTasks(DONE, false);
           var tasks = $scope.taskFolders[DONE].tasks;
           var count = tasks.length;
+
           for (i = 0; i < count; i++) {
             try {
               var days = Date.daysBetween(tasks[i].completeddate, new Date());
@@ -679,6 +708,36 @@ tbApp.controller(
                       if (cat.label == $scope.filter.category) {
                         return true;
                       }
+                    }
+                    return false;
+                  }
+                }
+              );
+            });
+          }
+        }
+
+        // Projects RD
+        if ($scope.filter.project != "<All Projects>") {
+          if ($scope.filter.project == "<No Project>") {
+            $scope.taskFolders.forEach(function (taskFolder) {
+              taskFolder.filteredTasks = $filter("filter")(
+                taskFolder.filteredTasks,
+                function (task) {
+                  return task.project === "";
+                }
+              );
+            });
+          } else {
+            $scope.taskFolders.forEach(function (taskFolder) {
+              taskFolder.filteredTasks = $filter("filter")(
+                taskFolder.filteredTasks,
+                function (task) {
+                  if (task.project == "") {
+                    return false;
+                  } else {
+                    if (task.project == $scope.filter.project) {
+                      return true;
                     }
                     return false;
                   }
@@ -1198,6 +1257,24 @@ tbApp.controller(
         // set sensitivity according to the current filter
         if ($scope.filter.private == $scope.privacyFilter.private.value) {
           taskitem.Sensitivity = SENSITIVITY.olPrivate;
+        }
+
+        // Projects RD set project according to the current filter
+        if (
+          $scope.filter.project !== "" &&
+          $scope.filter.project !== "<All Projects>" &&
+          $scope.filter.project !== "<No Project>"
+        ) {
+          taskitem.Companies = $scope.filter.project;
+        }
+
+        // Projects RD set category according to the current filter
+        if (
+          $scope.filter.category !== undefined &&
+          $scope.filter.category !== "<All Categories>" &&
+          $scope.filter.category !== "<No Category>"
+        ) {
+          taskitem.categories = $scope.filter.category;
         }
 
         // display outlook task item window
@@ -1736,6 +1813,8 @@ tbApp.controller(
           private: "0",
           search: "",
           category: "<All Categories>",
+          // Projects RD
+          project: "<All Projects>",
           mailbox: "",
         }; // default state
 
@@ -1766,6 +1845,8 @@ tbApp.controller(
           private: state.private,
           search: state.search,
           category: state.category,
+          // Projects RD
+          project: state.project,
           mailbox: state.mailbox,
         };
 
@@ -1799,6 +1880,8 @@ tbApp.controller(
             private: $scope.filter.private,
             search: $scope.filter.search,
             category: $scope.filter.category,
+            // Project RD
+            project: $scope.filter.project,
             mailbox: $scope.filter.mailbox,
           };
           if (DeepDiff.diff($scope.prevState, currState)) {
@@ -2086,6 +2169,32 @@ tbApp.controller(
         return catStyles;
       } catch (error) {
         writeLog("getCategoryStyles: " + error);
+      }
+    };
+
+    // Get tasks project (RD)
+    var getTaskProject = function (subject) {
+      try {
+        var subjArr = subject.split("|");
+        if (subjArr.length > 1) {
+          return subjArr[subjArr.length - 1].trim();
+        }
+      } catch (error) {
+        writeLog("getTaskProject: " + error);
+      }
+    };
+
+    // Get tasks subject (RD)
+    var getTaskSubject = function (subject) {
+      try {
+        var subjArr = subject.split("|");
+        if (subjArr.length > 1) {
+          return subjArr[0].trim();
+        } else {
+          return subject;
+        }
+      } catch (error) {
+        writeLog("getTaskSubject: " + error);
       }
     };
 

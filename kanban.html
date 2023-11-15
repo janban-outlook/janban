@@ -82,6 +82,14 @@
                         <input type="text" name="search" ng-model="filter.search" class="form-control"
                                                                                   placeholder="Filter" />
                         <div class="input-group-addon">
+                            <select class="btn btn-default btn-xs" ng-model="filter.project">
+                                <option ng-selected="{{project == filter.project}}" ng-repeat="project in activeProjects"
+                                                                                        value="{{project}}">
+                                {{project}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="input-group-addon">
                             <select class="btn btn-default btn-xs" ng-model="filter.category">
                                 <option ng-selected="{{category == filter.category}}" ng-repeat="category in activeCategories"
                                                                                       value="{{category}}">
