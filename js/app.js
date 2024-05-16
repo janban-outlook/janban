@@ -32,9 +32,10 @@ tbApp.controller(
     const SOMEDAY = 0;
     const BACKLOG = 1;
     const SPRINT = 2;
-    const DOING = 3;
-    const WAITING = 4;
-    const DONE = 5;
+    const WAITING = 3;
+    const OBJECTIVES = 4;
+    const GOALS = 5;
+    const DONE = 6;
 
     const MAX_LOG_ENTRIES = 1500;
 
@@ -56,6 +57,7 @@ tbApp.controller(
       { type: 3 },
       { type: 4 },
       { type: 5 },
+      { type: 6 },
     ];
 
     $scope.switchToAppMode = function () {
@@ -1166,6 +1168,106 @@ tbApp.controller(
           mailBody += "</ul>";
         }
 
+        // GOALS ITEMS
+        if ($scope.config.GOALS_FOLDER.REPORT.DISPLAY) {
+          var tasks = getTaskFolder(
+            $scope.filter.mailbox,
+            $scope.config.GOALS_FOLDER.NAME
+          ).Items;
+          tasks.Sort("[Importance][Status]", true);
+          mailBody += "<h3>" + $scope.config.GOALS_FOLDER.TITLE + "</h3>";
+          mailBody += "<ul>";
+          var count = tasks.Count;
+          for (i = 1; i <= count; i++) {
+            mailBody += "<li>";
+            if (tasks(i).Categories !== "") {
+              mailBody += "[" + tasks(i).Categories + "] ";
+            }
+            mailBody +=
+              "<strong>" +
+              tasks(i).Subject +
+              "</strong>" +
+              " - <i>" +
+              taskStatusText(tasks(i).Status) +
+              "</i>";
+            if ($scope.config.GOALS_FOLDER.DISPLAY_PROPERTIES.TOTALWORK) {
+              mailBody += " - " + tasks(i).TotalWork + " mn ";
+            }
+            if (tasks(i).Importance == 2) {
+              mailBody += "<font color=red> [H]</font>";
+            }
+            if (tasks(i).Importance == 0) {
+              mailBody += "<font color=gray> [L]</font>";
+            }
+            var dueDate = new Date(tasks(i).DueDate);
+            if (moment(dueDate).isValid && moment(dueDate).year() != 4501) {
+              mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]";
+            }
+            if (
+              taskBodyNotes(tasks(i).Body, 10000) &&
+              $scope.config.TASKBODY_IN_REPORT
+            ) {
+              mailBody +=
+                "<br>" +
+                "<font color=gray>" +
+                taskBodyNotes(tasks(i).Body, 10000) +
+                "</font>";
+            }
+            mailBody += "</li>";
+          }
+          mailBody += "</ul>";
+        }
+
+        // OBJECTIVES ITEMS
+        if ($scope.config.OBJECTIVES_FOLDER.REPORT.DISPLAY) {
+          var tasks = getTaskFolder(
+            $scope.filter.mailbox,
+            $scope.config.OBJECTIVES_FOLDER.NAME
+          ).Items;
+          tasks.Sort("[Importance][Status]", true);
+          mailBody += "<h3>" + $scope.config.OBJECTIVES_FOLDER.TITLE + "</h3>";
+          mailBody += "<ul>";
+          var count = tasks.Count;
+          for (i = 1; i <= count; i++) {
+            mailBody += "<li>";
+            if (tasks(i).Categories !== "") {
+              mailBody += "[" + tasks(i).Categories + "] ";
+            }
+            mailBody +=
+              "<strong>" +
+              tasks(i).Subject +
+              "</strong>" +
+              " - <i>" +
+              taskStatusText(tasks(i).Status) +
+              "</i>";
+            if ($scope.config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.TOTALWORK) {
+              mailBody += " - " + tasks(i).TotalWork + " mn ";
+            }
+            if (tasks(i).Importance == 2) {
+              mailBody += "<font color=red> [H]</font>";
+            }
+            if (tasks(i).Importance == 0) {
+              mailBody += "<font color=gray> [L]</font>";
+            }
+            var dueDate = new Date(tasks(i).DueDate);
+            if (moment(dueDate).isValid && moment(dueDate).year() != 4501) {
+              mailBody += " [Due: " + moment(dueDate).format("DD-MMM") + "]";
+            }
+            if (
+              taskBodyNotes(tasks(i).Body, 10000) &&
+              $scope.config.TASKBODY_IN_REPORT
+            ) {
+              mailBody +=
+                "<br>" +
+                "<font color=gray>" +
+                taskBodyNotes(tasks(i).Body, 10000) +
+                "</font>";
+            }
+            mailBody += "</li>";
+          }
+          mailBody += "</ul>";
+        }
+
         mailBody += "</body>";
 
         // include report content to the mail body
@@ -1238,16 +1340,22 @@ tbApp.controller(
               $scope.taskFolders[SPRINT].name
             );
             break;
-          case DOING:
+          case GOALS:
             var tasksfolder = getTaskFolder(
               $scope.filter.mailbox,
-              $scope.taskFolders[DOING].name
+              $scope.taskFolders[GOALS].name
             );
             break;
           case WAITING:
             var tasksfolder = getTaskFolder(
               $scope.filter.mailbox,
               $scope.taskFolders[WAITING].name
+            );
+            break;
+          case OBJECTIVES:
+            var tasksfolder = getTaskFolder(
+              $scope.filter.mailbox,
+              $scope.taskFolders[OBJECTIVES].name
             );
             break;
         }
@@ -1560,31 +1668,30 @@ tbApp.controller(
         $scope.taskFolders[SPRINT].allowAdd = true;
         $scope.taskFolders[SPRINT].allowEdit = true;
 
-        $scope.taskFolders[DOING].type = DOING;
-        $scope.taskFolders[DOING].initialStatus =
+        $scope.taskFolders[GOALS].type = GOALS;
+        $scope.taskFolders[GOALS].initialStatus =
           $scope.config.STATUS.IN_PROGRESS.VALUE;
-        $scope.taskFolders[DOING].display =
-          $scope.config.INPROGRESS_FOLDER.ACTIVE;
-        $scope.taskFolders[DOING].name = $scope.config.INPROGRESS_FOLDER.NAME;
-        $scope.taskFolders[DOING].title = $scope.config.INPROGRESS_FOLDER.TITLE;
-        $scope.taskFolders[DOING].limit = $scope.config.INPROGRESS_FOLDER.LIMIT;
-        $scope.taskFolders[DOING].sort = $scope.config.INPROGRESS_FOLDER.SORT;
-        $scope.taskFolders[DOING].displayOwner =
-          $scope.config.INPROGRESS_FOLDER.DISPLAY_PROPERTIES.OWNER;
-        $scope.taskFolders[DOING].displayPercent =
-          $scope.config.INPROGRESS_FOLDER.DISPLAY_PROPERTIES.PERCENT;
-        $scope.taskFolders[DOING].displayTotalWork =
-          $scope.config.INPROGRESS_FOLDER.DISPLAY_PROPERTIES.TOTALWORK;
-        $scope.taskFolders[DOING].displayStartDate =
-          $scope.config.INPROGRESS_FOLDER.DISPLAY_PROPERTIES.STARTDATE;
-        $scope.taskFolders[DOING].displayDueDate =
-          $scope.config.INPROGRESS_FOLDER.DISPLAY_PROPERTIES.DUEDATE;
-        $scope.taskFolders[DOING].filterOnStartDate =
-          $scope.config.INPROGRESS_FOLDER.FILTER_ON_START_DATE;
-        $scope.taskFolders[DOING].displayInReport =
-          $scope.config.INPROGRESS_FOLDER.REPORT.DISPLAY;
-        $scope.taskFolders[DOING].allowAdd = false;
-        $scope.taskFolders[DOING].allowEdit = true;
+        $scope.taskFolders[GOALS].display = $scope.config.GOALS_FOLDER.ACTIVE;
+        $scope.taskFolders[GOALS].name = $scope.config.GOALS_FOLDER.NAME;
+        $scope.taskFolders[GOALS].title = $scope.config.GOALS_FOLDER.TITLE;
+        $scope.taskFolders[GOALS].limit = $scope.config.GOALS_FOLDER.LIMIT;
+        $scope.taskFolders[GOALS].sort = $scope.config.GOALS_FOLDER.SORT;
+        $scope.taskFolders[GOALS].displayOwner =
+          $scope.config.GOALS_FOLDER.DISPLAY_PROPERTIES.OWNER;
+        $scope.taskFolders[GOALS].displayPercent =
+          $scope.config.GOALS_FOLDER.DISPLAY_PROPERTIES.PERCENT;
+        $scope.taskFolders[GOALS].displayTotalWork =
+          $scope.config.GOALS_FOLDER.DISPLAY_PROPERTIES.TOTALWORK;
+        $scope.taskFolders[GOALS].displayStartDate =
+          $scope.config.GOALS_FOLDER.DISPLAY_PROPERTIES.STARTDATE;
+        $scope.taskFolders[GOALS].displayDueDate =
+          $scope.config.GOALS_FOLDER.DISPLAY_PROPERTIES.DUEDATE;
+        $scope.taskFolders[GOALS].filterOnStartDate =
+          $scope.config.GOALS_FOLDER.FILTER_ON_START_DATE;
+        $scope.taskFolders[GOALS].displayInReport =
+          $scope.config.GOALS_FOLDER.REPORT.DISPLAY;
+        $scope.taskFolders[GOALS].allowAdd = true;
+        $scope.taskFolders[GOALS].allowEdit = true;
 
         $scope.taskFolders[WAITING].type = WAITING;
         $scope.taskFolders[WAITING].initialStatus =
@@ -1637,6 +1744,37 @@ tbApp.controller(
           $scope.config.COMPLETED_FOLDER.REPORT.DISPLAY;
         $scope.taskFolders[DONE].allowAdd = false;
         $scope.taskFolders[DONE].allowEdit = false;
+
+        // RD 202405
+        $scope.taskFolders[OBJECTIVES].type = OBJECTIVES;
+        $scope.taskFolders[OBJECTIVES].initialStatus =
+          $scope.config.STATUS.IN_PROGRESS.VALUE;
+        $scope.taskFolders[OBJECTIVES].display =
+          $scope.config.OBJECTIVES_FOLDER.ACTIVE;
+        $scope.taskFolders[OBJECTIVES].name =
+          $scope.config.OBJECTIVES_FOLDER.NAME;
+        $scope.taskFolders[OBJECTIVES].title =
+          $scope.config.OBJECTIVES_FOLDER.TITLE;
+        $scope.taskFolders[OBJECTIVES].limit =
+          $scope.config.OBJECTIVES_FOLDER.LIMIT;
+        $scope.taskFolders[OBJECTIVES].sort =
+          $scope.config.OBJECTIVES_FOLDER.SORT;
+        $scope.taskFolders[OBJECTIVES].displayOwner =
+          $scope.config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.OWNER;
+        $scope.taskFolders[OBJECTIVES].displayPercent =
+          $scope.config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.PERCENT;
+        $scope.taskFolders[OBJECTIVES].displayTotalWork =
+          $scope.config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.TOTALWORK;
+        $scope.taskFolders[OBJECTIVES].displayStartDate =
+          $scope.config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.STARTDATE;
+        $scope.taskFolders[OBJECTIVES].displayDueDate =
+          $scope.config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.DUEDATE;
+        $scope.taskFolders[OBJECTIVES].filterOnStartDate =
+          $scope.config.OBJECTIVES_FOLDER.FILTER_ON_START_DATE;
+        $scope.taskFolders[OBJECTIVES].displayInReport =
+          $scope.config.OBJECTIVES_FOLDER.REPORT.DISPLAY;
+        $scope.taskFolders[OBJECTIVES].allowAdd = true;
+        $scope.taskFolders[OBJECTIVES].allowEdit = true;
       } catch (error) {
         writeLog("applyConfig: " + error);
       }
@@ -1685,7 +1823,7 @@ tbApp.controller(
         NEXT_FOLDER: {
           TYPE: "SPRINT",
           ACTIVE: true,
-          NAME: "Kanban",
+          NAME: "@Kanban",
           TITLE: "NEXT",
           LIMIT: 20,
           SORT: "duedate,-priority",
@@ -1701,11 +1839,30 @@ tbApp.controller(
             DISPLAY: true,
           },
         },
-        INPROGRESS_FOLDER: {
-          TYPE: "DOING",
+        GOALS_FOLDER: {
+          TYPE: "GOALS",
           ACTIVE: true,
-          NAME: "Kanban",
-          TITLE: "IN PROGRESS",
+          NAME: "@Kanban",
+          TITLE: "GOALS",
+          LIMIT: 5,
+          SORT: "-priority",
+          DISPLAY_PROPERTIES: {
+            OWNER: false,
+            PERCENT: false,
+            TOTALWORK: false,
+            STARTDATE: false,
+            DUEDATE: true,
+          },
+          FILTER_ON_START_DATE: undefined,
+          REPORT: {
+            DISPLAY: true,
+          },
+        },
+        OBJECTIVES_FOLDER: {
+          TYPE: "OBJECTIVES",
+          ACTIVE: true,
+          NAME: "@Kanban",
+          TITLE: "OBJECTIVES",
           LIMIT: 5,
           SORT: "-priority",
           DISPLAY_PROPERTIES: {
@@ -1723,7 +1880,7 @@ tbApp.controller(
         WAITING_FOLDER: {
           TYPE: "WAITING",
           ACTIVE: true,
-          NAME: "Kanban",
+          NAME: "@Kanban",
           TITLE: "WAITING",
           LIMIT: 0,
           SORT: "-priority",
@@ -1742,7 +1899,7 @@ tbApp.controller(
         COMPLETED_FOLDER: {
           TYPE: "DONE",
           ACTIVE: true,
-          NAME: "Kanban",
+          NAME: "@Kanban",
           TITLE: "COMPLETED",
           LIMIT: 0,
           SORT: "-completeddate,-priority,subject",

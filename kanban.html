@@ -221,6 +221,8 @@
                                         <li><a data-toggle="tab" href="#progress">{{config.INPROGRESS_FOLDER.TITLE}}</a></li>
                                         <li><a data-toggle="tab" href="#waiting">{{config.WAITING_FOLDER.TITLE}}</a></li>
                                         <li><a data-toggle="tab" href="#done">{{config.COMPLETED_FOLDER.TITLE}}</a></li>
+                                        <li><a data-toggle="tab" href="#objectives">{{config.OBJECTIVES_FOLDER.TITLE}}</a></li>
+                                        <li><a data-toggle="tab" href="#goals">{{config.GOALS_FOLDER.TITLE}}</a></li>
                                     </ul>
 
                                     <div class="tab-content" style="height:140px">
@@ -560,6 +562,113 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div id="objectives" class="tab-pane fade">
+                                            <div class="form-check row col-sm-12">
+                                                <label class="control-label col-sm-1">Show this column:</label>
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" ng-model="config.OBJECTIVES_FOLDER.ACTIVE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Title:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Title"
+                                                                                                     ng-model="config.OBJECTIVES_FOLDER.TITLE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Folder name:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Folder Name"
+                                                                                                     ng-model="config.OBJECTIVES_FOLDER.NAME">
+                                                </div>
+                                            </div>
+                                            <div class="form-check row col-sm-12">
+                                                <label class="control-label col-sm-1">Display:</label>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"><input type="checkbox"
+                                                                                        ng-model="config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.OWNER"> Owner</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"><input type="checkbox"
+                                                                                        ng-model="config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.PERCENT"> Percentage
+                                                                                        done</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"> <input type="checkbox"
+                                                                                         ng-model="config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.TOTALWORK"> Total
+                                                                                         work</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"> <input type="checkbox"
+                                                                                         ng-model="config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.STARTDATE"> Start Date</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"> <input type="checkbox"
+                                                                                         ng-model="config.OBJECTIVES_FOLDER.DISPLAY_PROPERTIES.DUEDATE"> Due Date</label>
+                                                </div>
+                                            </div>
+                                            <div class="form-check row col-sm-12">
+                                                <label class="control-label col-sm-1">Include in report:</label>
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" ng-model="config.OBJECTIVES_FOLDER.REPORT.DISPLAY">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="goals" class="tab-pane fade">
+                                            <div class="form-check row col-sm-12">
+                                                <label class="control-label col-sm-1">Show this column:</label>
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" ng-model="config.GOALS_FOLDER.ACTIVE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Title:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Title"
+                                                                                                     ng-model="config.GOALS_FOLDER.TITLE">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row col-sm-12">
+                                                <label class="control-label col-sm-1">Folder name:</label>
+                                                <div class="col-sm-2">
+                                                    <input type="text" class="form-control input-sm" placeholder="Enter Folder Name"
+                                                                                                     ng-model="config.GOALS_FOLDER.NAME">
+                                                </div>
+                                            </div>
+                                            <div class="form-check row col-sm-12">
+                                                <label class="control-label col-sm-1">Display:</label>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"><input type="checkbox"
+                                                                                        ng-model="config.GOALS_FOLDER.DISPLAY_PROPERTIES.OWNER"> Owner</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"><input type="checkbox"
+                                                                                        ng-model="config.GOALS_FOLDER.DISPLAY_PROPERTIES.PERCENT"> Percentage
+                                                                                        done</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"> <input type="checkbox"
+                                                                                         ng-model="config.GOALS_FOLDER.DISPLAY_PROPERTIES.TOTALWORK"> Total
+                                                                                         work</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"> <input type="checkbox"
+                                                                                         ng-model="config.GOALS_FOLDER.DISPLAY_PROPERTIES.STARTDATE"> Start Date</label>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <label class="control-label"> <input type="checkbox"
+                                                                                         ng-model="config.GOALS_FOLDER.DISPLAY_PROPERTIES.DUEDATE"> Due Date</label>
+                                                </div>
+                                            </div>
+                                            <div class="form-check row col-sm-12">
+                                                <label class="control-label col-sm-1">Include in report:</label>
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" ng-model="config.GOALS_FOLDER.REPORT.DISPLAY">
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -656,7 +765,7 @@
                                         <div class="form-group row col-sm-12">
                                             <label class="control-label col-sm-1">Done tasks action:</label>
                                             <div class="col-sm-11">
-                                                <select class="col-sm-1" ng-model="config.COMPLETED.ACTION">
+                                                <select class="col-sm-1" ng-model="config.GOALS.ACTION">
                                                     <option>DELETE</option>
                                                     <option>ARCHIVE</option>
                                                     <option>NOTHING</option>
