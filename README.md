@@ -1,3 +1,20 @@
+# ⚠️ PROJECT STATUS: UNMAINTAINED ⚠️
+
+After many years of development and maintenance, I have decided to retire from active development of JanBan. As I no longer use Windows or Office personally, I've been unable to maintain the project for the past few years. 
+
+I initially thought I might pick up development again after my retirement, but after consideration, I've decided not to purchase Windows and Office licenses or set up a new development environment specifically for this purpose.
+
+**What this means:**
+- The repository has been migrated from GitLab to GitHub to increase visibility
+- No new features will be implemented by me
+- I will not be able to respond to support requests
+- The application is stable in its current state with no major known issues
+
+**For users:** Thank you for your interest and support over the years. The current version should continue to work as is.
+
+**For developers:** This project is now open for adoption! Feel free to fork the repository, make improvements, or use it as a foundation for a new version. If you're interested in becoming a maintainer or creating your own fork, please feel free to do so.
+
+I'm grateful to everyone who used JanBan and found it helpful for their workflow. While it's difficult to step away, I hope this project can continue to evolve through the open source community.
 # Outlook Kanban Taskboard aka **JanBan**
 
 In case you found this repository on Github:
