@@ -19,7 +19,8 @@ I'm grateful to everyone who used JanBan and found it helpful for their workflow
 # Outlook Kanban Taskboard aka **JanBan**
 
 ⚠️ NOTA BENE: I changed below instructions a bit, because the online version of the app is no longer available. Most of you installed it locally, so that should still work. ⚠️
-⚠️ And: I have no possibility to test it, so I couldn't verify proper working anymore ⚠️
+
+⚠️ Also note that I have no possibility to test it anymore, so I haven't verified proper working ⚠️
 
 ![logo](/images/janban-icon-512-300x300.jpg)
 
