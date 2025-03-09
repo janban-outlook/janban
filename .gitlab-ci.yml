@@ -1,42 +1,6 @@
 stages:
   - deploy
 
-deploy_test:
-  stage: deploy
-  image: debian:jessie
-  only: 
-    - test
-  script:
-    - apt-get -u update
-    - apt-get -y install curl zip
-    - sed -i "s|#WHATSNEW#|$WHATSNEW|" js/app.js
-    - sed -i "s|#VERSION#|$VERSION|" js/app.js
-    - sed -i "s|#DOWNLOAD#|$DOWNLOAD|" js/app.js
-    - mv kanban.html index.html
-    - curl -T "{index.html,whatsnew.html}" $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T janban-icon-512.jpg $FTPSITE/janban-test/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/angular.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl --connect-timeout 600 -T lip/angular.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/bootstrap.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/deep-diff-0.3.8.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/checklist-model.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/jquery.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/jquery-ui.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/minify.json.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/moment.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/sortable.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T lip/sortable.min.js $FTPSITE/janban-test/lip/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T js/app.js $FTPSITE/janban-test/js/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T js/exchange.js $FTPSITE/janban-test/js/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T js/version.js $FTPSITE/janban-test/js/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T css/bootstrap.min.css $FTPSITE/janban-test/css/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T css/taskboard.css $FTPSITE/janban-test/css/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T fonts/glyphicons-halflings-regular.eot $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T fonts/glyphicons-halflings-regular.svg $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T fonts/glyphicons-halflings-regular.ttf $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T fonts/glyphicons-halflings-regular.woff $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-    - curl -T fonts/glyphicons-halflings-regular.woff2 $FTPSITE/janban-test/fonts/ --user $FTPUSERJANWARE:$FTPPWDJANWARE
-
 deploy:
   stage: deploy
   image: debian:jessie

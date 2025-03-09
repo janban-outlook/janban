@@ -1585,7 +1585,8 @@ tbApp.controller('taskboardController', function ($scope, $filter, $http, $inter
         $scope.VERSION_URL = '#VERSION#';
         $scope.DOWNLOAD_URL = '#DOWNLOAD#';
         $scope.WHATSNEW_URL = '#WHATSNEW#';
-        $scope.version = VERSION;
+        $scope.version = '2.1.11';
+        $scope.version_number = '2.1.11';
     }
 
     var debug_alert = function (msg) {
